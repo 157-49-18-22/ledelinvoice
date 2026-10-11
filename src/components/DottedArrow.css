@@ -1,0 +1,33 @@
+.dotted-arrow {
+  position: relative;
+  width: 100px;
+  height: 100px;
+  margin: 20px auto;
+}
+
+.dotted-path {
+  stroke-dasharray: 4;
+  animation: dash 3s linear infinite;
+  stroke: #FFD700;
+  fill: none;
+}
+
+@keyframes dash {
+  to {
+    stroke-dashoffset: -20;
+  }
+}
+
+.arrow-head {
+  fill: #FFD700;
+  animation: bounce 1s ease-in-out infinite;
+}
+
+@keyframes bounce {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(5px);
+  }
+} 

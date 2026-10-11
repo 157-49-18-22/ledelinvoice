@@ -1,0 +1,156 @@
+.buyer-list-page {
+  min-height: 100vh;
+  background-color: #f5f5f5;
+}
+
+.list-header {
+  background-color: #FFD700;
+  padding: 1rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.list-header h1 {
+  font-size: 1.2rem;
+  margin: 0;
+  white-space: nowrap; /* Yeh text ko wrap hone se rokega */
+  overflow: hidden;     /* Agar text container se bahar jaye to usse chhupa dega */
+  text-overflow: ellipsis; /* Agar text cut ho raha ho to end mein "..." dikhayega */
+}
+
+.add-button {
+  background: none;
+  border: none;
+  font-size: 1rem;
+  font-weight: 500;
+  cursor: pointer;
+  padding: 0.5rem 1rem;
+}
+
+.search-container {
+  padding: 1rem;
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+  background-color: white;
+}
+
+.search-box {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  background-color: #f5f5f5;
+  border-radius: 24px;
+  padding: 0.5rem 1rem;
+}
+
+.search-icon {
+  margin-right: 0.5rem;
+  color: #666;
+}
+
+.search-box input {
+  border: none;
+  background: none;
+  outline: none;
+  width: 100%;
+  font-size: 1rem;
+}
+
+.filter-button {
+  background: none;
+  border: none;
+  color: #4040ff;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.buyer-list {
+  padding: 1rem;
+}
+
+.buyer-card {
+  background: white;
+  border: 1px solid #eee;
+  border-radius: 8px;
+  padding: 1rem;
+  margin-bottom: 1rem;
+  cursor: pointer;
+  transition: box-shadow 0.2s ease-in-out;
+  position: relative; /* Needed for absolute positioning of actions */
+}
+
+.buyer-card:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+.buyer-card h2 {
+  margin: 0 0 1rem 0;
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #333;
+  /* Ensure text doesn't overlap buttons */
+  padding-right: 60px; 
+}
+
+.buyer-card-actions {
+  position: absolute;
+  top: 1rem; /* Align with top padding */
+  right: 1rem; /* Align with right padding */
+  display: flex;
+  gap: 0.5rem;
+}
+
+.icon-button {
+  background: none;
+  border: none;
+  padding: 0.3rem;
+  cursor: pointer;
+  color: #777;
+  font-size: 1rem; /* Adjust icon size */
+  transition: color 0.2s;
+}
+
+.icon-button:hover {
+  color: #333;
+}
+
+.icon-button.edit:hover {
+  color: #007bff; /* Blue on hover for edit */
+}
+
+.icon-button.delete:hover {
+  color: #dc3545; /* Red on hover for delete */
+}
+
+.buyer-info {
+  margin-top: 0.5rem;
+}
+
+.info-row {
+  display: flex;
+  justify-content: space-between; /* Puts label left, value right */
+  align-items: center;
+  margin-bottom: 0.5rem;
+  font-size: 0.9rem;
+  color: #555;
+}
+
+.info-row .label {
+  font-weight: 500;
+  color: #444;
+  min-width: 60px; /* Give labels some minimum width */
+}
+
+.info-row .value {
+  text-align: right;
+  word-break: break-word; /* Prevent long values overflowing */
+}
+
+.no-buyers-message {
+  text-align: center;
+  padding: 2rem;
+  color: #777;
+  font-style: italic;
+} 

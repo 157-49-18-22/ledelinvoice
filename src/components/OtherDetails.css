@@ -1,0 +1,429 @@
+.details-page {
+  min-height: 100vh;
+  background-color: #f5f5f5;
+}
+
+.details-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px;
+  background-color: #ffd700;
+}
+
+.header-left {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.header-left h1 {
+  
+  font-size: 20px;
+  font-weight: 500;
+  color: #000;
+}
+
+.back-button {
+  background: none;
+  border: none;
+  font-size: 24px;
+  cursor: pointer;
+  padding: 0;
+  color: #000;
+}
+
+.save-button {
+  background: none;
+  border: none;
+  font-size: 16px;
+  font-weight: 500;
+  cursor: pointer;
+  padding: 8px 16px;
+  color: #000;
+}
+
+.details-form {
+  --form-accent-color: #4f46e5; /* Primary color */
+  --form-shadow-color: rgba(0, 0, 0, 0.08);
+  --form-border-color: #e2e8f0;
+  --form-bg-color: white;
+  --form-radius: 12px;
+  --form-transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+
+  position: relative;
+  margin-top: 2rem;
+  padding: 1.75rem;
+  padding-bottom: 4.5rem;
+  background-color: var(--form-bg-color);
+  border-radius: var(--form-radius);
+  box-shadow: 
+    0 1px 3px 0 var(--form-shadow-color),
+    0 1px 2px -1px var(--form-shadow-color);
+  border: 1px solid var(--form-border-color);
+  transition: var(--form-transition);
+  
+  /* Gradient border effect on hover */
+  background-clip: padding-box;
+  border: 1px solid transparent;
+  background-image: linear-gradient(var(--form-bg-color), var(--form-bg-color)), 
+                    linear-gradient(to right, #f3f4f6, var(--form-accent-color));
+  background-origin: border-box;
+  background-clip: padding-box, border-box;
+
+  /* Animation */
+  animation: fadeIn 0.3s ease-out forwards;
+  
+  /* Responsive adjustments */
+  @media (max-width: 768px) {
+    padding: 1.25rem;
+    padding-bottom: 5rem;
+    margin-top: 1rem;
+    border-radius: calc(var(--form-radius) * 0.75);
+  }
+
+  /* Form elements styling */
+  & input, & select, & textarea {
+    transition: var(--form-transition);
+    border: 1px solid var(--form-border-color);
+  }
+
+  & input:focus, & select:focus, & textarea:focus {
+    border-color: var(--form-accent-color);
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--form-accent-color) 20%, transparent);
+  }
+
+  /* Floating label effect */
+  & .form-group {
+    position: relative;
+    margin-bottom: 1.5rem;
+  }
+
+  /* Submit button positioning */
+  & .form-actions {
+    position: absolute;
+    right: 1.75rem;
+    bottom: 1.75rem;
+    display: flex;
+    gap: 1rem;
+
+    @media (max-width: 768px) {
+      right: 1.25rem;
+      bottom: 1.25rem;
+    }
+  }
+}
+
+/* Animation keyframes */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+
+
+.form-group {
+  margin-bottom: 20px;
+}
+
+.form-group label {
+  display: block;
+  font-size: 20px;
+  font-weight: 500;
+  color: #333;
+  margin-bottom: 8px;
+}
+
+.form-group input[type="text"],
+.form-group input[type="date"],
+.form-group input[type="number"] {
+  width: 90%;
+  padding: 10px 12px;
+  font-size: 20px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  transition: border-color 0.2s;
+}
+
+.form-group input[type="text"]:focus,
+.form-group input[type="date"]:focus,
+.form-group input[type="number"]:focus {
+  border-color: #007bff;
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.1);
+ 
+
+}
+
+/* Checkbox and Radio Styles */
+.checkbox-group,
+.radio-group {
+  margin-top: 10px;
+}
+
+.checkbox-label,
+.radio-label {
+  display: flex;
+  align-items: center;
+  font-size: 20px;
+  color: #333;
+  margin-bottom: 8px;
+  cursor: pointer;
+}
+
+input[type="checkbox"],
+input[type="radio"] {
+  margin-right: 8px;
+  width: 16px;
+  height: 16px;
+  cursor: pointer;
+}
+
+/* Tax Preference Section */
+.tax-preference {
+  margin-top: 24px;
+}
+
+.tax-preference-title {
+  font-size: 20px;
+  font-weight: 500;
+  color: #333;
+  margin-bottom: 12px;
+}
+
+.radio-options {
+  display: flex;
+  gap: 24px;
+  margin-top: 8px;
+}
+
+/* Section Headers */
+.section-header {
+  font-size: 16px;
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 16px;
+  padding-bottom: 8px;
+  border-bottom: 2px solid #ffd700;
+}
+
+/* Other Charges Section */
+.other-charges {
+  margin-top: 24px;
+}
+
+/* TCS Section */
+.tcs-section {
+  margin-top: 24px;
+  padding-top: 16px;
+  border-top: 1px solid #eee;
+}
+
+/* Reverse Charge Section */
+.reverse-charge {
+  margin-top: 24px;
+  padding-top: 16px;
+  border-top: 1px solid #eee;
+}
+
+/* Input placeholder style */
+input::placeholder {
+  color: #999;
+  font-size: 13px;
+}
+
+/* Date input specific style */
+input[type="date"] {
+  color: #333;
+  font-family: inherit;
+}
+
+/* Error state for inputs */
+.form-group input.error {
+  border-color: #dc3545;
+}
+
+/* Required field indicator */
+.required-field::after {
+  content: "*";
+  color: #dc3545;
+  margin-left: 4px;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .other-details-container {
+    padding: 16px;
+  }
+
+  .form-group input[type="text"],
+  .form-group input[type="date"],
+  .form-group input[type="number"] {
+    padding: 8px 10px;
+   
+  }
+
+  .radio-options {
+    flex-direction: column;
+    gap: 12px;
+  }
+}
+
+/* Header with back button */
+.header {
+  display: flex;
+  align-items: center;
+  background-color: #ffd700;
+  padding: 12px 20px;
+  margin-bottom: 24px;
+  border-radius: 4px;
+}
+
+.back-button {
+  background: none;
+  border: none;
+  font-size: 20px;
+  color: #333;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  padding: 8px;
+  margin-right: 16px;
+}
+
+.back-button:hover {
+  color: #000;
+}
+
+.page-title {
+  font-size: 18px;
+  font-weight: 600;
+  color: #333;
+  margin: 0;
+}
+
+/* Save button style */
+.save-button {
+  background-color: #007bff;
+  color: white;
+  border: none;
+  padding: 10px 24px;
+  font-size: 20px;
+  font-weight: 500;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  margin-top: 24px;
+}
+
+.save-button:hover {
+  background-color: #0056b3;
+}
+
+/* Bottom fixed save button */
+.bottom-save-button {
+  display: none;
+}
+
+.other-details-container {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 20px;
+  background-color: #fff;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.section-title {
+  font-size: 16px;
+  color: #000;
+  padding: 12px 16px;
+  background-color: #f5f5f5;
+  margin: 24px -16px;
+}
+
+.charge-section {
+  margin-top: 24px;
+}
+
+.charge-group {
+  margin-bottom: 24px;
+}
+
+.charge-group h3 {
+  font-size: 20px;
+  color: #000;
+  margin-bottom: 8px;
+}
+
+.charge-inputs {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 8px;
+}
+
+.charge-name {
+  margin-bottom: 8px;
+}
+
+.optional-fields {
+  margin-top: 16px;
+}
+
+.form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.form-row input {
+  width: 90%;
+  padding: 12px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 20px;
+  color: #666;
+}
+
+.form-row input::placeholder {
+  color: #999;
+}
+
+.fixed-bottom-save {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: 16px;
+  background-color: #fff;
+  box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
+  text-align: center;
+  z-index: 1000;
+  display: flex;
+  justify-content: center;
+}
+
+.fixed-bottom-save button {
+  background-color: #007bff;
+  width: 100%;
+  color: white;
+  border: none;
+  padding: 12px 48px;
+  font-size: 16px;
+  font-weight: 500;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.2s;
+  height: 56px;
+}
+
+.fixed-bottom-save button:hover {
+  background-color: #0056b3;
+} 

@@ -1,0 +1,236 @@
+.details-page {
+  min-height: 100vh;
+  background-color: #f5f5f5;
+}
+
+.details-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px;
+  background-color: #ffd700;
+}
+
+.header-left {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.back-button {
+  background: none;
+  border: none;
+  font-size: 24px;
+  cursor: pointer;
+  padding: 0;
+}
+
+.save-button {
+  background-color: #2563eb; /* Tailwind's blue-600 */
+  color: #ffffff;
+  border: none;
+  font-weight: 600;
+  font-size: 16px;
+  cursor: pointer;
+  padding: 12px 24px;
+  width: 200px;
+  margin-top: 10px;
+  border-radius: 12px;
+  box-shadow: 0 4px 14px rgba(37, 99, 235, 0.3);
+  transition: background-color 0.3s ease, transform 0.2s ease, box-shadow 0.3s ease;
+}
+
+.save-button:hover {
+  background-color: #1d4ed8; /* Tailwind's blue-700 */
+  transform: translateY(-2px);
+  box-shadow: 0 6px 18px rgba(37, 99, 235, 0.4);
+}
+
+.save-button:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 10px rgba(37, 99, 235, 0.2);
+}
+
+.save-button:focus {
+  outline: 2px solid #93c5fd; /* Tailwind's blue-300 */
+  outline-offset: 2px;
+}
+
+.details-form {
+  --form-accent-color: #4f46e5; /* Primary color */
+  --form-shadow-color: rgba(0, 0, 0, 0.08);
+  --form-border-color: #e2e8f0;
+  --form-bg-color: white;
+  --form-radius: 12px;
+  --form-transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+
+  position: relative;
+  margin-top: 2rem;
+  padding: 1.75rem;
+  padding-bottom: 4.5rem;
+  background-color: var(--form-bg-color);
+  border-radius: var(--form-radius);
+  box-shadow: 
+    0 1px 3px 0 var(--form-shadow-color),
+    0 1px 2px -1px var(--form-shadow-color);
+  border: 1px solid var(--form-border-color);
+  transition: var(--form-transition);
+  
+  /* Gradient border effect on hover */
+  background-clip: padding-box;
+  border: 1px solid transparent;
+  background-image: linear-gradient(var(--form-bg-color), var(--form-bg-color)), 
+                    linear-gradient(to right, #f3f4f6, var(--form-accent-color));
+  background-origin: border-box;
+  background-clip: padding-box, border-box;
+
+  /* Animation */
+  animation: fadeIn 0.3s ease-out forwards;
+  
+  /* Responsive adjustments */
+  @media (max-width: 768px) {
+    padding: 1.25rem;
+    padding-bottom: 5rem;
+    margin-top: 1rem;
+    border-radius: calc(var(--form-radius) * 0.75);
+  }
+
+  /* Form elements styling */
+  & input, & select, & textarea {
+    transition: var(--form-transition);
+    border: 1px solid var(--form-border-color);
+    font-size: 1.30rem; 
+  }
+
+  & input:focus, & select:focus, & textarea:focus {
+    border-color: var(--form-accent-color);
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--form-accent-color) 20%, transparent);
+  }
+
+  /* Floating label effect */
+  & .form-group {
+    position: relative;
+    margin-bottom: 1.5rem;
+  }
+
+  /* Submit button positioning */
+  & .form-actions {
+    position: absolute;
+    right: 1.75rem;
+    bottom: 1.75rem;
+    display: flex;
+    gap: 1rem;
+
+    @media (max-width: 768px) {
+      right: 1.25rem;
+      bottom: 1.25rem;
+    }
+  }
+}
+
+/* Animation keyframes */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+
+.form-group {
+  margin-bottom: 24px;
+}
+
+.form-group label {
+  display: block;
+  font-size: 16px;
+  color: #666;
+  margin-bottom: 8px;
+}
+
+.form-group input {
+  width: 90%;
+  padding: 12px;
+  border: none;
+  border-bottom: 1px solid #ddd;
+  font-size: 16px;
+  background-color: transparent;
+}
+
+.form-group input:focus {
+  outline: none;
+  border-bottom-color: #007bff;
+}
+
+.form-group input::placeholder {
+  color: #999;
+}
+
+.required {
+  color: #ff4444;
+  margin-left: 4px;
+}
+
+.more-options {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px;
+  background-color: #f0f0f0;
+  cursor: pointer;
+  margin: 16px -16px;
+}
+
+.more-options span {
+  font-size: 16px;
+  color: #333;
+}
+
+.arrow {
+  font-size: 12px;
+  transition: transform 0.3s ease;
+}
+
+.arrow.up {
+  transform: rotate(180deg);
+}
+
+.additional-fields {
+  margin-top: 16px;
+}
+
+/* Save button at bottom */
+.save-button-bottom {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: 16px;
+  background-color: #1a73e8;
+  color: white;
+  text-align: center;
+  font-size: 16px;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  cursor: pointer;
+  border: none;
+  box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.1);
+  transition: background-color 0.2s ease;
+  height: 56px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.save-button-bottom:hover {
+  background-color: #1557b0;
+}
+
+.save-button-bottom:active {
+  background-color: #0d47a1;
+} 

@@ -1,0 +1,241 @@
+.product-list-page {
+  min-height: 100vh;
+  background-color: #f8f9fa;
+  padding-bottom: 2rem;
+}
+
+.list-header {
+  background-color: #FFD700;
+  padding: 1.2rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.list-header h1 {
+  font-size: 1.4rem;
+  margin: 0;
+  color: white;
+  font-weight: 600;
+}
+
+.header-left {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.back-button {
+  background: rgba(255,255,255,0.2);
+  border: none;
+  color: white;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.back-button:hover {
+  background: rgba(255,255,255,0.3);
+  transform: scale(1.05);
+}
+
+.add-button {
+  background-color: #fff;
+  border: none;
+  color: #333;
+  font-size: 0.95rem;
+  font-weight: 600;
+  padding: 0.6rem 1.2rem;
+  border-radius: 20px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 120px;
+}
+
+.add-button:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+  background-color: #f8f9fa;
+}
+
+.search-container {
+  padding: 1.2rem;
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+  background-color: white;
+  border-bottom: 1px solid #eee;
+}
+
+.search-box {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  background-color: #f5f7fa;
+  border-radius: 24px;
+  padding: 0.7rem 1.2rem;
+  transition: all 0.2s ease;
+  border: 2px solid transparent;
+}
+
+.search-box:focus-within {
+  border-color: #2196F3;
+  background-color: #fff;
+  box-shadow: 0 2px 8px rgba(33, 150, 243, 0.1);
+}
+
+.search-icon {
+  margin-right: 0.8rem;
+  color: #666;
+}
+
+.search-box input {
+  border: none;
+  background: none;
+  outline: none;
+  width: 50%;
+  font-size: 1.2rem; /* Text ab bada ho gaya */
+  color: #333;
+}
+
+.search-box input::placeholder {
+  color: #999;
+}
+
+.filter-button {
+  background: none;
+  border: none;
+  color: #4040ff;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.product-list {
+  padding: 1.2rem;
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+}
+
+.product-card {
+  background: white;
+  border-radius: 12px;
+  padding: 1.2rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  border: 1px solid #eef2f7;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+}
+
+.product-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 16px rgba(0,0,0,0.08);
+  border-color: #2196F3;
+}
+
+.product-card h2 {
+  margin: 0 0 1rem 0;
+  font-size: 1.15rem;
+  font-weight: 600;
+  color: #2c3e50;
+  padding-right: 65px;
+  line-height: 1.4;
+}
+
+.product-card-actions {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  display: flex;
+  gap: 0.5rem;
+  opacity: 0.7;
+  transition: opacity 0.2s ease;
+}
+
+.product-card:hover .product-card-actions {
+  opacity: 1;
+}
+
+.icon-button {
+  background: #f8f9fa;
+  border: none;
+  padding: 0.5rem;
+  cursor: pointer;
+  color: #666;
+  font-size: 1rem;
+  transition: all 0.2s ease;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.icon-button:hover {
+  transform: scale(1.1);
+}
+
+.icon-button.edit:hover {
+  background: #e3f2fd;
+  color: #2196F3;
+}
+
+.icon-button.delete:hover {
+  background: #ffebee;
+  color: #f44336;
+}
+
+.product-info {
+  margin-top: 0.8rem;
+  display: grid;
+  gap: 0.8rem;
+}
+
+.info-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.5rem;
+  background: #f8f9fa;
+  border-radius: 8px;
+  transition: background-color 0.2s ease;
+}
+
+.info-row:hover {
+  background: #e3f2fd;
+}
+
+.info-row .label {
+  font-weight: 500;
+  color: #546e7a;
+  min-width: 70px;
+}
+
+.info-row .value {
+  text-align: right;
+  word-break: break-word;
+  color: #2c3e50;
+  font-weight: 500;
+}
+
+.no-products-message {
+  text-align: center;
+  padding: 3rem;
+  color: #78909c;
+  font-style: italic;
+  grid-column: 1 / -1;
+  background: white;
+  border-radius: 12px;
+  border: 2px dashed #e0e0e0;
+}
