@@ -188,7 +188,7 @@ const InvoiceDashboard = (props) => {
           <h1>Invoices</h1>
         </div>
         <button className="create-new-button" onClick={props.onCreateInvoice}>
-          <FiPlus /> Create New
+          <span className="btn-icon-wrap"><FiPlus /></span> Create New
         </button>
       </header>
 
