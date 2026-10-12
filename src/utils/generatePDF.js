@@ -314,6 +314,11 @@
     const buyer = invoice?.buyerData || invoice?.selectedBuyer || {};
     const products = invoice?.products || [];
     const bankData = invoice?.bankData || {};
+    const otherData = invoice?.otherData || {};
+    const transportData = invoice?.transportData || {};
+    const advancePaid = parseFloat(invoice?.advancePaid || 0);
+    const consigneeType = invoice?.consigneeType || 'same';
+    const consignee = consigneeType === 'different' ? (invoice?.consigneeData || {}) : buyer;
     const discountPercent = parseFloat(invoice?.discountPercent || 0);
     const tdsEnabled = invoice?.tdsEnabled || false;
     const tdsRate = parseFloat(invoice?.tdsPercent || 0);
@@ -459,9 +464,15 @@
               {/* flex items-center justify-center gap-2 mt-1 text-xs */}
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', marginTop: '4px', fontSize: '12px', lineHeight: '16px' }}>
                 <span>GSTIN : {supplier.gstin}</span>
-                {supplier.stateCode &&
-                  <span style={{ border: B, padding: '0 4px' }}>State Code : {supplier.stateCode}</span>
-                }
+                {supplier.pan && <span>| PAN : {supplier.pan}</span>}
+              </div>
+              {supplier.msme && (
+                <div style={{ fontSize: '12px', fontWeight: 700, marginTop: '2px' }}>
+                  MSME : {supplier.msme}
+                </div>
+              )}
+              <div style={{ fontSize: '12px', fontWeight: 700, marginTop: '2px' }}>
+                State Name : {supplier.state || 'Haryana'}{supplier.stateCode ? `, Code : ${supplier.stateCode}` : ''}
               </div>
             </div>
           </div>
@@ -478,41 +489,83 @@
             </p>
           </div>
 
-          {/* ── Invoice Details: border-b border-black ── */}
-          <div style={{ borderBottom: B }}>
-            {[
-              ['Invoice Number', invoice.invoiceNumber || invoice.number],
-              ['Invoice Date', formatDate(invoice.date)],
-              ['State', (supplier.state || '').toUpperCase()],
-              ['Reverse Charge', 'NO'],
-            ].map(([label, value], i, arr) => (
-              <div key={label} style={{
-                display: 'flex', justifyContent: 'space-between',
-                padding: '4px 12px', fontSize: '12px', lineHeight: '16px',
-                borderBottom: i < arr.length - 1 ? `1px solid #e5e7eb` : 'none',
-              }}>
-                <span>{label}</span>
-                <span style={{ fontWeight: 700 }}>{value}</span>
+          {/* ── Invoice Details 2-Column Grid: border-b border-black ── */}
+          <div style={{ display: 'flex', borderBottom: B, fontSize: '12px', lineHeight: '16px' }}>
+            <div style={{ flex: 1, borderRight: B, padding: '6px 12px' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', padding: '2px 0' }}>
+                <span>Invoice No.:</span><span style={{ fontWeight: 700 }}>{invoice.invoiceNumber || invoice.number}</span>
               </div>
-            ))}
+              <div style={{ display: 'flex', justifyContent: 'space-between', padding: '2px 0' }}>
+                <span>Date:</span><span style={{ fontWeight: 700 }}>{formatDate(invoice.date)}</span>
+              </div>
+              {otherData.poNumber && (
+                <div style={{ display: 'flex', justifyContent: 'space-between', padding: '2px 0' }}>
+                  <span>Customer PO No.:</span><span style={{ fontWeight: 700 }}>{otherData.poNumber}</span>
+                </div>
+              )}
+              {otherData.poDate && (
+                <div style={{ display: 'flex', justifyContent: 'space-between', padding: '2px 0' }}>
+                  <span>Customer PO Date:</span><span style={{ fontWeight: 700 }}>{formatDate(otherData.poDate)}</span>
+                </div>
+              )}
+              {otherData.paymentTerms && (
+                <div style={{ display: 'flex', justifyContent: 'space-between', padding: '2px 0' }}>
+                  <span>Payment Terms:</span><span style={{ fontWeight: 700 }}>{otherData.paymentTerms}</span>
+                </div>
+              )}
+            </div>
+            <div style={{ flex: 1, padding: '6px 12px' }}>
+              {transportData.transportMode && transportData.transportMode !== 'not-applicable' && (
+                <div style={{ display: 'flex', justifyContent: 'space-between', padding: '2px 0' }}>
+                  <span>Mode of Transport:</span><span style={{ fontWeight: 700, textTransform: 'uppercase' }}>{transportData.transportMode}</span>
+                </div>
+              )}
+              {otherData.ewayBillNumber && (
+                <div style={{ display: 'flex', justifyContent: 'space-between', padding: '2px 0' }}>
+                  <span>E-Way Bill No.:</span><span style={{ fontWeight: 700 }}>{otherData.ewayBillNumber}</span>
+                </div>
+              )}
+              {(transportData.placeOfSupply || buyer.state) && (
+                <div style={{ display: 'flex', justifyContent: 'space-between', padding: '2px 0' }}>
+                  <span>Place of Supply:</span>
+                  <span style={{ fontWeight: 700, textTransform: 'uppercase' }}>
+                    {transportData.placeOfSupply || `${buyer.state || ''} ${buyer.stateCode ? `- ${buyer.stateCode}` : ''}`}
+                  </span>
+                </div>
+              )}
+              {otherData.termsOfDelivery && (
+                <div style={{ display: 'flex', justifyContent: 'space-between', padding: '2px 0' }}>
+                  <span>Terms of Delivery:</span><span style={{ fontWeight: 700 }}>{otherData.termsOfDelivery}</span>
+                </div>
+              )}
+              <div style={{ display: 'flex', justifyContent: 'space-between', padding: '2px 0' }}>
+                <span>Reverse Charge:</span><span style={{ fontWeight: 700 }}>NO</span>
+              </div>
+            </div>
           </div>
 
-          {/* ── Receiver Header: bg-blue-100 border-b border-black py-1 text-center ── */}
-          <div style={{ background: BLUE100, borderBottom: B, padding: '4px', textAlign: 'center' }}>
-            <p style={{ fontSize: '12px', lineHeight: '16px', fontWeight: 700, margin: 0 }}>
-              Details of Receiver | Billed to
-            </p>
-          </div>
-
-          {/* ── Receiver Details: border-b border-black p-3 text-xs ── */}
-          <div style={{ borderBottom: B, padding: '12px', fontSize: '12px', lineHeight: '16px' }}>
-            <p style={{ margin: 0 }}><span style={{ fontWeight: 700 }}>Name:</span> {buyer.name || buyer.companyName}</p>
-            <p style={{ margin: '4px 0 0' }}><span style={{ fontWeight: 700 }}>Address:</span> {buyer.address}</p>
-            <p style={{ margin: '4px 0 0' }}>
-              <span style={{ fontWeight: 700 }}>GSTIN:</span> {buyer.gstin || 'Not specified'}
-              {buyer.stateCode && <span style={{ border: B, padding: '0 4px', marginLeft: '4px' }}>State Code : {buyer.stateCode}</span>}
-            </p>
-            <p style={{ margin: '4px 0 0' }}><span style={{ fontWeight: 700 }}>State:</span> {buyer.state}</p>
+          {/* ── Consignee & Buyer Details: border-b border-black ── */}
+          <div style={{ display: 'flex', borderBottom: B, fontSize: '12px', lineHeight: '16px' }}>
+            {consigneeType !== 'not-required' && (
+              <div style={{ flex: 1, borderRight: B, padding: '8px 12px' }}>
+                <p style={{ fontWeight: 700, color: BLUE700, margin: '0 0 4px', borderBottom: '1px solid #e5e7eb', paddingBottom: '2px' }}>
+                  Consignee (Ship to)
+                </p>
+                <p style={{ margin: '2px 0', fontWeight: 700 }}>{(consigneeType === 'same' ? buyer.name || buyer.companyName : consignee.companyName || consignee.name) || ''}</p>
+                <p style={{ margin: '2px 0' }}>{(consigneeType === 'same' ? buyer.address : consignee.address) || ''}</p>
+                <p style={{ margin: '2px 0' }}><span style={{ fontWeight: 700 }}>GSTIN:</span> {(consigneeType === 'same' ? buyer.gstin : consignee.gstin) || 'Not specified'}</p>
+                <p style={{ margin: '2px 0' }}><span style={{ fontWeight: 700 }}>State Name:</span> {(consigneeType === 'same' ? buyer.state : consignee.state) || ''} {((consigneeType === 'same' ? buyer.stateCode : consignee.stateCode)) ? `, Code: ${consigneeType === 'same' ? buyer.stateCode : consignee.stateCode}` : ''}</p>
+              </div>
+            )}
+            <div style={{ flex: 1, padding: '8px 12px' }}>
+              <p style={{ fontWeight: 700, color: BLUE700, margin: '0 0 4px', borderBottom: '1px solid #e5e7eb', paddingBottom: '2px' }}>
+                Buyer (Bill to)
+              </p>
+              <p style={{ margin: '2px 0', fontWeight: 700 }}>{buyer.name || buyer.companyName}</p>
+              <p style={{ margin: '2px 0' }}>{buyer.address}</p>
+              <p style={{ margin: '2px 0' }}><span style={{ fontWeight: 700 }}>GSTIN:</span> {buyer.gstin || 'Not specified'}</p>
+              <p style={{ margin: '2px 0' }}><span style={{ fontWeight: 700 }}>State Name:</span> {buyer.state} {buyer.stateCode ? `, Code: ${buyer.stateCode}` : ''}</p>
+            </div>
           </div>
 
           {/* ── Items Table: w-full border-collapse text-xs ── */}
@@ -608,32 +661,35 @@
               <div style={{ flex: 1, borderRight: B, display: 'flex', flexDirection: 'column' }}>
 
                 {/* Amount in words */}
-                <div style={{ padding: '8px', textAlign: 'center', borderBottom: B }}>
-                  <p style={{ fontSize: '12px', lineHeight: '16px', fontWeight: 700, margin: 0 }}>
-                    Total Invoice Amount in words
+                <div style={{ padding: '8px', textAlign: 'center', borderBottom: B, position: 'relative' }}>
+                  <p style={{ fontSize: '12px', lineHeight: '16px', fontWeight: 700, margin: 0, textTransform: 'uppercase' }}>
+                    Amount Chargeable (in words)
                   </p>
-                  <p style={{ fontSize: '12px', lineHeight: '16px', margin: '4px 0 0' }}>
-                    {numToWords(finalAmount)} Rupees Only /-
+                  <p style={{ fontSize: '12px', lineHeight: '16px', margin: '4px 0 0', fontStyle: 'italic', fontWeight: 700 }}>
+                    INR {numToWords(advancePaid > 0 ? Math.round(grandTotal - advancePaid) : afterRoundOff)} only
                   </p>
+                  <span style={{ position: 'absolute', right: '8px', bottom: '4px', fontSize: '10px', fontWeight: 700, color: '#4b5563' }}>
+                    E. & O.E.
+                  </span>
                 </div>
 
                 {/* Bank details */}
                 {bankData?.bankName && (
                   <div style={{ padding: '8px', flex: 1 }}>
                     <p style={{ fontSize: '12px', lineHeight: '16px', fontWeight: 700, color: BLUE700, margin: '0 0 4px' }}>
-                      🏦 Bank and Payment Details
+                      🏦 Bank Details
                     </p>
                     <div style={{ display: 'grid', gridTemplateColumns: 'auto 1fr', columnGap: '16px', rowGap: '3px', fontSize: '12px', lineHeight: '16px' }}>
-                      <span>Account Name</span>
-                      <span style={{ fontWeight: 700, textAlign: 'right' }}>{bankData.accountHolderName || supplier.name || supplier.companyName}</span>
-                      <span>Account No.</span>
-                      <span style={{ fontWeight: 700, textAlign: 'right' }}>{bankData.accountNumber}</span>
-                      <span>IFSC Code</span>
-                      <span style={{ fontWeight: 700, textAlign: 'right' }}>{bankData.ifscCode}</span>
-                      <span>Bank Name</span>
+                      <span>Bank:</span>
                       <span style={{ fontWeight: 700, textAlign: 'right' }}>{bankData.bankName}</span>
+                      <span>Beneficiary Name:</span>
+                      <span style={{ fontWeight: 700, textAlign: 'right' }}>{bankData.accountHolderName || supplier.name || supplier.companyName}</span>
+                      <span>Current Account No.:</span>
+                      <span style={{ fontWeight: 700, textAlign: 'right' }}>{bankData.accountNumber}</span>
+                      <span>IFSC Code:</span>
+                      <span style={{ fontWeight: 700, textAlign: 'right' }}>{bankData.ifscCode}</span>
                       {bankData.branchName && <>
-                        <span>Branch Name</span>
+                        <span>Branch Name:</span>
                         <span style={{ fontWeight: 700, textAlign: 'right' }}>{bankData.branchName}</span>
                       </>}
                     </div>
@@ -643,54 +699,80 @@
 
               {/* Right col — totals panel, width matches Code 2's w-64 */}
               <div style={{ width: '256px', flexShrink: 0, fontSize: '12px', lineHeight: '16px', display: 'flex', flexDirection: 'column' }}>
-                <div style={{ display: 'flex', borderBottom: B }}>
-                  <span style={{ flex: 1, padding: '4px' }}>Total Amount Before Tax</span>
+                <div style={{ display: 'flex', borderBottom: B, background: BLUE100 }}>
+                  <span style={{ flex: 1, padding: '4px' }}>Basic Price</span>
                   <span style={{ width: '96px', padding: '4px', textAlign: 'right', fontWeight: 700 }}>₹ {fmt(subTotal)}</span>
                 </div>
+                {discountPercent > 0 && (
+                  <>
+                    <div style={{ display: 'flex', borderBottom: B }}>
+                      <span style={{ flex: 1, padding: '4px' }}>(-) Discount ({discountPercent}%)</span>
+                      <span style={{ width: '96px', padding: '4px', textAlign: 'right', fontWeight: 700 }}>-₹ {fmt(discountAmount)}</span>
+                    </div>
+                    <div style={{ display: 'flex', borderBottom: B, background: BLUE100 }}>
+                      <span style={{ flex: 1, padding: '4px' }}>Amount</span>
+                      <span style={{ width: '96px', padding: '4px', textAlign: 'right', fontWeight: 700 }}>₹ {fmt(subTotal - discountAmount)}</span>
+                    </div>
+                  </>
+                )}
                 {showIGST && (
                   <div style={{ display: 'flex', borderBottom: B }}>
-                    <span style={{ flex: 1, padding: '4px' }}>Add : IGST</span>
+                    <span style={{ flex: 1, padding: '4px' }}>(+) IGST</span>
                     <span style={{ width: '96px', padding: '4px', textAlign: 'right', fontWeight: 700 }}>₹ {fmt(totalIGST)}</span>
                   </div>
                 )}
                 {showSGST && <>
                   <div style={{ display: 'flex', borderBottom: B }}>
-                    <span style={{ flex: 1, padding: '4px' }}>Add : CGST</span>
+                    <span style={{ flex: 1, padding: '4px' }}>(+) CGST</span>
                     <span style={{ width: '96px', padding: '4px', textAlign: 'right', fontWeight: 700 }}>₹ {fmt(totalSGST)}</span>
                   </div>
                   <div style={{ display: 'flex', borderBottom: B }}>
-                    <span style={{ flex: 1, padding: '4px' }}>Add : SGST</span>
+                    <span style={{ flex: 1, padding: '4px' }}>(+) SGST</span>
                     <span style={{ width: '96px', padding: '4px', textAlign: 'right', fontWeight: 700 }}>₹ {fmt(totalSGST)}</span>
                   </div>
                 </>}
-                <div style={{ display: 'flex', borderBottom: B }}>
-                  <span style={{ flex: 1, padding: '4px' }}>Total Tax Amount</span>
-                  <span style={{ width: '96px', padding: '4px', textAlign: 'right', fontWeight: 700 }}>₹ {fmt(totalGST)}</span>
+                <div style={{ display: 'flex', borderBottom: B, background: BLUE100 }}>
+                  <span style={{ flex: 1, padding: '4px', fontWeight: 700 }}>Total Price</span>
+                  <span style={{ width: '96px', padding: '4px', textAlign: 'right', fontWeight: 700 }}>₹ {fmt(grandTotal)}</span>
                 </div>
-                {discountPercent > 0 && (
-                  <div style={{ display: 'flex', borderBottom: B }}>
-                    <span style={{ flex: 1, padding: '4px' }}>Discount ({discountPercent}%)</span>
-                    <span style={{ width: '96px', padding: '4px', textAlign: 'right', fontWeight: 700 }}>-₹ {fmt(discountAmount)}</span>
-                  </div>
+                {advancePaid > 0 && (
+                  <>
+                    <div style={{ display: 'flex', borderBottom: B, background: '#fef3c7' }}>
+                      <span style={{ flex: 1, padding: '4px' }}>Advance paid</span>
+                      <span style={{ width: '96px', padding: '4px', textAlign: 'right', fontWeight: 700 }}>₹ {fmt(advancePaid)}</span>
+                    </div>
+                    <div style={{ display: 'flex', borderBottom: B, background: BLUE100 }}>
+                      <span style={{ flex: 1, padding: '4px', fontWeight: 700 }}>Balance Payment</span>
+                      <span style={{ width: '96px', padding: '4px', textAlign: 'right', fontWeight: 700 }}>₹ {fmt(grandTotal - advancePaid)}</span>
+                    </div>
+                    <div style={{ display: 'flex', flex: 1, background: BLUE100 }}>
+                      <span style={{ flex: 1, padding: '4px', fontWeight: 700 }}>Balance Payment (rounded off)</span>
+                      <span style={{ width: '96px', padding: '4px', textAlign: 'right', fontWeight: 700 }}>₹ {fmt(Math.round(grandTotal - advancePaid))}</span>
+                    </div>
+                  </>
                 )}
-                <div style={{ display: 'flex', borderBottom: B }}>
-                  <span style={{ flex: 1, padding: '4px' }}>Round Off Value</span>
-                  <span style={{ width: '96px', padding: '4px', textAlign: 'right', fontWeight: 700 }}>₹ {roundOff.toFixed(2)}</span>
-                </div>
-                {tdsEnabled && tdsRate > 0 && (
-                  <div style={{ display: 'flex', borderBottom: B, background: '#fff3cd' }}>
-                    <span style={{ flex: 1, padding: '4px' }}>Less: TDS ({tdsRate}%)</span>
-                    <span style={{ width: '96px', padding: '4px', textAlign: 'right', fontWeight: 700 }}>-₹ {fmt(tdsAmount)}</span>
-                  </div>
+                {!(advancePaid > 0) && (
+                  <>
+                    <div style={{ display: 'flex', borderBottom: B }}>
+                      <span style={{ flex: 1, padding: '4px' }}>Round Off Value</span>
+                      <span style={{ width: '96px', padding: '4px', textAlign: 'right', fontWeight: 700 }}>₹ {roundOff.toFixed(2)}</span>
+                    </div>
+                    {tdsEnabled && tdsRate > 0 && (
+                      <div style={{ display: 'flex', borderBottom: B, background: '#fff3cd' }}>
+                        <span style={{ flex: 1, padding: '4px' }}>Less: TDS ({tdsRate}%)</span>
+                        <span style={{ width: '96px', padding: '4px', textAlign: 'right', fontWeight: 700 }}>-₹ {fmt(tdsAmount)}</span>
+                      </div>
+                    )}
+                    <div style={{ display: 'flex', borderBottom: B }}>
+                      <span style={{ flex: 1, padding: '4px', fontWeight: 700 }}>Final Invoice Amount</span>
+                      <span style={{ width: '96px', padding: '4px', textAlign: 'right', fontWeight: 700 }}>₹ {fmt(finalAmount)}</span>
+                    </div>
+                    <div style={{ display: 'flex', flex: 1 }}>
+                      <span style={{ flex: 1, padding: '4px', fontWeight: 700 }}>Balance Due</span>
+                      <span style={{ width: '96px', padding: '4px', textAlign: 'right', fontWeight: 700 }}>₹ {fmt(finalAmount)}</span>
+                    </div>
+                  </>
                 )}
-                <div style={{ display: 'flex', borderBottom: B }}>
-                  <span style={{ flex: 1, padding: '4px', fontWeight: 700 }}>Final Invoice Amount</span>
-                  <span style={{ width: '96px', padding: '4px', textAlign: 'right', fontWeight: 700 }}>₹ {fmt(finalAmount)}</span>
-                </div>
-                <div style={{ display: 'flex', flex: 1 }}>
-                  <span style={{ flex: 1, padding: '4px', fontWeight: 700 }}>Balance Due</span>
-                  <span style={{ width: '96px', padding: '4px', textAlign: 'right', fontWeight: 700 }}>₹ {fmt(finalAmount)}</span>
-                </div>
               </div>
             </div>
 

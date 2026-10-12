@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import './shared.css';
 import './OtherDetails.css';
 
 const OtherDetails = ({ onClose, onSave, initialData }) => {
@@ -9,7 +8,10 @@ const OtherDetails = ({ onClose, onSave, initialData }) => {
     challanNumber: initialData?.challanNumber || '',
     dueDate: initialData?.dueDate || new Date().toISOString().split('T')[0],
     ewayBillNumber: initialData?.ewayBillNumber || '',
+    paymentTerms: initialData?.paymentTerms || '',
+    termsOfDelivery: initialData?.termsOfDelivery || '',
     salesPerson: initialData?.salesPerson || '',
+    reverseCharge: initialData?.reverseCharge || false,
     tcsEnabled: initialData?.tcsEnabled || false,
     tcsAmount: initialData?.tcsAmount || '',
     taxPreference: initialData?.taxPreference || 'tax-exclusive',
@@ -65,7 +67,7 @@ const OtherDetails = ({ onClose, onSave, initialData }) => {
   };
 
   const handleSubmit = (e) => {
-    e.preventDefault();
+    if (e) e.preventDefault();
     onSave(otherData);
   };
 
@@ -73,127 +75,153 @@ const OtherDetails = ({ onClose, onSave, initialData }) => {
     <div className="details-page">
       <header className="details-header">
         <div className="header-left">
-          <button className="back-button" onClick={onClose}>←</button>
+          <button type="button" className="back-button" onClick={onClose} aria-label="Go Back">←</button>
           <h1>Other Details</h1>
         </div>
       </header>
 
-      <form className="details-form" onSubmit={handleSubmit}>
-        <div className="form-group">
-          <label htmlFor="poNumber">PO Number</label>
-          <input
-            type="text"
-            id="poNumber"
-            name="poNumber"
-            value={otherData.poNumber}
-            onChange={handleChange}
-            placeholder="Enter PO Number"
-          />
-        </div>
-
-        <div className="form-group">
-          <label htmlFor="poDate">PO Date</label>
-          <input
-            type="date"
-            id="poDate"
-            name="poDate"
-            value={otherData.poDate}
-            onChange={handleChange}
-          />
-        </div>
-
-        <div className="form-group">
-          <label htmlFor="challanNumber">Challan Number</label>
-          <input
-            type="text"
-            id="challanNumber"
-            name="challanNumber"
-            value={otherData.challanNumber}
-            onChange={handleChange}
-            placeholder="Enter Challan Number"
-          />
-        </div>
-
-        <div className="form-group">
-          <label htmlFor="dueDate">Due Date</label>
-          <input
-            type="date"
-            id="dueDate"
-            name="dueDate"
-            value={otherData.dueDate}
-            onChange={handleChange}
-          />
-        </div>
-
-        <div className="form-group">
-          <label htmlFor="ewayBillNumber">e-Way Bill Number</label>
-          <input
-            type="text"
-            id="ewayBillNumber"
-            name="ewayBillNumber"
-            value={otherData.ewayBillNumber}
-            onChange={handleChange}
-            placeholder="Enter e-Way Bill Number"
-          />
-        </div>
-
-        <div className="form-group">
-          <label htmlFor="salesPerson">Sales Person</label>
-          <input
-            type="text"
-            id="salesPerson"
-            name="salesPerson"
-            value={otherData.salesPerson}
-            onChange={handleChange}
-            placeholder="Sales Person"
-          />
-        </div>
-
-        <div className="section-title">Other Charges</div>
-
-        <div className="form-group">
-          <label>Reverse Charge</label>
-          <div className="checkbox-group">
-            <input
-              type="checkbox"
-              id="reverseCharge"
-              name="reverseCharge"
-              checked={otherData.reverseCharge}
-              onChange={handleChange}
-            />
-            <label htmlFor="reverseCharge">
-              Is this transaction applicable for reverse charge?
-            </label>
-          </div>
-        </div>
-
-        <div className="form-group">
-          <label>TCS (Tax Collected at Source)</label>
-          <div className="checkbox-group">
-            <input
-              type="checkbox"
-              id="tcsEnabled"
-              name="tcsEnabled"
-              checked={otherData.tcsEnabled}
-              onChange={handleChange}
-            />
-            <label htmlFor="tcsEnabled">TCS</label>
-          </div>
-          {otherData.tcsEnabled && (
+      <form className="other-details-form" onSubmit={handleSubmit}>
+        {/* Order & Transport Info Grid */}
+        <div className="section-heading">Order & Document Details</div>
+        <div className="form-grid-2">
+          <div className="form-field">
+            <label htmlFor="poNumber">Customer PO Number</label>
             <input
               type="text"
+              id="poNumber"
+              name="poNumber"
+              value={otherData.poNumber}
+              onChange={handleChange}
+              placeholder="e.g. Verbal / PO-9842"
+            />
+          </div>
+
+          <div className="form-field">
+            <label htmlFor="poDate">Customer PO Date</label>
+            <input
+              type="date"
+              id="poDate"
+              name="poDate"
+              value={otherData.poDate}
+              onChange={handleChange}
+            />
+          </div>
+
+          <div className="form-field">
+            <label htmlFor="challanNumber">Challan Number</label>
+            <input
+              type="text"
+              id="challanNumber"
+              name="challanNumber"
+              value={otherData.challanNumber}
+              onChange={handleChange}
+              placeholder="Enter Challan Number"
+            />
+          </div>
+
+          <div className="form-field">
+            <label htmlFor="dueDate">Due Date</label>
+            <input
+              type="date"
+              id="dueDate"
+              name="dueDate"
+              value={otherData.dueDate}
+              onChange={handleChange}
+            />
+          </div>
+
+          <div className="form-field">
+            <label htmlFor="ewayBillNumber">e-Way Bill Number</label>
+            <input
+              type="text"
+              id="ewayBillNumber"
+              name="ewayBillNumber"
+              value={otherData.ewayBillNumber}
+              onChange={handleChange}
+              placeholder="Enter e-Way Bill Number"
+            />
+          </div>
+
+          <div className="form-field">
+            <label htmlFor="salesPerson">Sales Person</label>
+            <input
+              type="text"
+              id="salesPerson"
+              name="salesPerson"
+              value={otherData.salesPerson}
+              onChange={handleChange}
+              placeholder="Sales Person Name"
+            />
+          </div>
+
+          <div className="form-field">
+            <label htmlFor="paymentTerms">Payment Terms</label>
+            <input
+              type="text"
+              id="paymentTerms"
+              name="paymentTerms"
+              value={otherData.paymentTerms}
+              onChange={handleChange}
+              placeholder="e.g. 100% against PI / Net 30 days"
+            />
+          </div>
+
+          <div className="form-field">
+            <label htmlFor="termsOfDelivery">Terms of Delivery</label>
+            <input
+              type="text"
+              id="termsOfDelivery"
+              name="termsOfDelivery"
+              value={otherData.termsOfDelivery}
+              onChange={handleChange}
+              placeholder="e.g. Door Delivery / Ex-Works"
+            />
+          </div>
+        </div>
+
+        {/* Taxes & Preferences */}
+        <div className="section-heading">Taxes & Preferences</div>
+
+        <label className="checkbox-card">
+          <input
+            type="checkbox"
+            id="reverseCharge"
+            name="reverseCharge"
+            checked={Boolean(otherData.reverseCharge)}
+            onChange={handleChange}
+          />
+          <span>Applicable for Reverse Charge</span>
+        </label>
+
+        <label className="checkbox-card">
+          <input
+            type="checkbox"
+            id="tcsEnabled"
+            name="tcsEnabled"
+            checked={Boolean(otherData.tcsEnabled)}
+            onChange={handleChange}
+          />
+          <span>Enable TCS (Tax Collected at Source)</span>
+        </label>
+
+        {otherData.tcsEnabled && (
+          <div className="form-field" style={{ marginBottom: '16px' }}>
+            <label htmlFor="tcsAmount">TCS Amount (₹)</label>
+            <input
+              type="text"
+              id="tcsAmount"
               name="tcsAmount"
               value={otherData.tcsAmount}
               onChange={handleChange}
-              placeholder="Enter TCS"
+              placeholder="Enter TCS Amount"
             />
-          )}
-        </div>
+          </div>
+        )}
 
-        <div className="form-group">
+        <div className="form-field" style={{ marginTop: '12px' }}>
           <label>Tax Preference</label>
-          <div className="tax-preference">
-            <label>
+          <div className="tax-preference-container">
+            <label className={`radio-pill ${otherData.taxPreference === 'tax-exclusive' ? 'active' : ''}`}>
               <input
                 type="radio"
                 name="taxPreference"
@@ -201,9 +229,9 @@ const OtherDetails = ({ onClose, onSave, initialData }) => {
                 checked={otherData.taxPreference === 'tax-exclusive'}
                 onChange={handleChange}
               />
-              Tax Exclusive
+              <span>Tax Exclusive</span>
             </label>
-            <label>
+            <label className={`radio-pill ${otherData.taxPreference === 'tax-inclusive' ? 'active' : ''}`}>
               <input
                 type="radio"
                 name="taxPreference"
@@ -211,9 +239,9 @@ const OtherDetails = ({ onClose, onSave, initialData }) => {
                 checked={otherData.taxPreference === 'tax-inclusive'}
                 onChange={handleChange}
               />
-              Tax Inclusive
+              <span>Tax Inclusive</span>
             </label>
-            <label>
+            <label className={`radio-pill ${otherData.taxPreference === 'no-gst' ? 'active' : ''}`}>
               <input
                 type="radio"
                 name="taxPreference"
@@ -221,194 +249,200 @@ const OtherDetails = ({ onClose, onSave, initialData }) => {
                 checked={otherData.taxPreference === 'no-gst'}
                 onChange={handleChange}
               />
-              No GST
+              <span>No GST</span>
             </label>
           </div>
         </div>
 
-        <div className="charge-section">
-          <div className="charge-group">
-            <h3>Freight Charge</h3>
-            <div className="charge-inputs">
-              <input
-                type="text"
-                name="freightCharge.taxableAmount"
-                value={otherData.freightCharge.taxableAmount}
-                onChange={handleChange}
-                placeholder="Taxable Amount"
-              />
-              <input
-                type="text"
-                name="freightCharge.gst"
-                value={otherData.freightCharge.gst}
-                onChange={handleChange}
-                placeholder="GST"
-              />
-              <input
-                type="text"
-                name="freightCharge.finalAmount"
-                value={otherData.freightCharge.finalAmount}
-                onChange={handleChange}
-                placeholder="Final Amount"
-              />
-            </div>
-          </div>
+        {/* Additional Charges Section */}
+        <div className="section-heading">Additional Charges</div>
 
-          <div className="charge-group">
-            <h3>Insurance Charge</h3>
-            <div className="charge-inputs">
-              <input
-                type="text"
-                name="insuranceCharge.taxableAmount"
-                value={otherData.insuranceCharge.taxableAmount}
-                onChange={handleChange}
-                placeholder="Taxable Amount"
-              />
-              <input
-                type="text"
-                name="insuranceCharge.gst"
-                value={otherData.insuranceCharge.gst}
-                onChange={handleChange}
-                placeholder="GST"
-              />
-              <input
-                type="text"
-                name="insuranceCharge.finalAmount"
-                value={otherData.insuranceCharge.finalAmount}
-                onChange={handleChange}
-                placeholder="Final Amount"
-              />
-            </div>
+        <div className="charge-card">
+          <div className="charge-card-title">Freight Charge</div>
+          <div className="charge-inputs-row">
+            <input
+              type="text"
+              name="freightCharge.taxableAmount"
+              value={otherData.freightCharge.taxableAmount}
+              onChange={handleChange}
+              placeholder="Taxable Amount"
+            />
+            <input
+              type="text"
+              name="freightCharge.gst"
+              value={otherData.freightCharge.gst}
+              onChange={handleChange}
+              placeholder="GST %"
+            />
+            <input
+              type="text"
+              name="freightCharge.finalAmount"
+              value={otherData.freightCharge.finalAmount}
+              onChange={handleChange}
+              placeholder="Final Amount"
+            />
           </div>
+        </div>
 
-          <div className="charge-group">
-            <h3>Loading Charge</h3>
-            <div className="charge-inputs">
-              <input
-                type="text"
-                name="loadingCharge.taxableAmount"
-                value={otherData.loadingCharge.taxableAmount}
-                onChange={handleChange}
-                placeholder="Taxable Amount"
-              />
-              <input
-                type="text"
-                name="loadingCharge.gst"
-                value={otherData.loadingCharge.gst}
-                onChange={handleChange}
-                placeholder="GST"
-              />
-              <input
-                type="text"
-                name="loadingCharge.finalAmount"
-                value={otherData.loadingCharge.finalAmount}
-                onChange={handleChange}
-                placeholder="Final Amount"
-              />
-            </div>
+        <div className="charge-card">
+          <div className="charge-card-title">Insurance Charge</div>
+          <div className="charge-inputs-row">
+            <input
+              type="text"
+              name="insuranceCharge.taxableAmount"
+              value={otherData.insuranceCharge.taxableAmount}
+              onChange={handleChange}
+              placeholder="Taxable Amount"
+            />
+            <input
+              type="text"
+              name="insuranceCharge.gst"
+              value={otherData.insuranceCharge.gst}
+              onChange={handleChange}
+              placeholder="GST %"
+            />
+            <input
+              type="text"
+              name="insuranceCharge.finalAmount"
+              value={otherData.insuranceCharge.finalAmount}
+              onChange={handleChange}
+              placeholder="Final Amount"
+            />
           </div>
+        </div>
 
-          <div className="charge-group">
-            <h3>Packaging Charge</h3>
-            <div className="charge-inputs">
-              <input
-                type="text"
-                name="packagingCharge.taxableAmount"
-                value={otherData.packagingCharge.taxableAmount}
-                onChange={handleChange}
-                placeholder="Taxable Amount"
-              />
-              <input
-                type="text"
-                name="packagingCharge.gst"
-                value={otherData.packagingCharge.gst}
-                onChange={handleChange}
-                placeholder="GST"
-              />
-              <input
-                type="text"
-                name="packagingCharge.finalAmount"
-                value={otherData.packagingCharge.finalAmount}
-                onChange={handleChange}
-                placeholder="Final Amount"
-              />
-            </div>
+        <div className="charge-card">
+          <div className="charge-card-title">Loading Charge</div>
+          <div className="charge-inputs-row">
+            <input
+              type="text"
+              name="loadingCharge.taxableAmount"
+              value={otherData.loadingCharge.taxableAmount}
+              onChange={handleChange}
+              placeholder="Taxable Amount"
+            />
+            <input
+              type="text"
+              name="loadingCharge.gst"
+              value={otherData.loadingCharge.gst}
+              onChange={handleChange}
+              placeholder="GST %"
+            />
+            <input
+              type="text"
+              name="loadingCharge.finalAmount"
+              value={otherData.loadingCharge.finalAmount}
+              onChange={handleChange}
+              placeholder="Final Amount"
+            />
           </div>
+        </div>
 
-          <div className="charge-group">
-            <h3>Other Charge</h3>
+        <div className="charge-card">
+          <div className="charge-card-title">Packaging Charge</div>
+          <div className="charge-inputs-row">
+            <input
+              type="text"
+              name="packagingCharge.taxableAmount"
+              value={otherData.packagingCharge.taxableAmount}
+              onChange={handleChange}
+              placeholder="Taxable Amount"
+            />
+            <input
+              type="text"
+              name="packagingCharge.gst"
+              value={otherData.packagingCharge.gst}
+              onChange={handleChange}
+              placeholder="GST %"
+            />
+            <input
+              type="text"
+              name="packagingCharge.finalAmount"
+              value={otherData.packagingCharge.finalAmount}
+              onChange={handleChange}
+              placeholder="Final Amount"
+            />
+          </div>
+        </div>
+
+        <div className="charge-card">
+          <div className="charge-card-title">Other Charge</div>
+          <div style={{ marginBottom: '10px' }}>
             <input
               type="text"
               name="otherCharge.name"
               value={otherData.otherCharge.name}
               onChange={handleChange}
-              placeholder="Other Charge Name"
-              className="charge-name"
+              placeholder="Charge Name (e.g. Handling Charge)"
+              style={{ width: '100%', padding: '9px 12px', borderRadius: '6px', border: '1px solid #cbd5e1', fontSize: '13px', boxSizing: 'border-box' }}
             />
-            <div className="charge-inputs">
-              <input
-                type="text"
-                name="otherCharge.taxableAmount"
-                value={otherData.otherCharge.taxableAmount}
-                onChange={handleChange}
-                placeholder="Taxable Amount"
-              />
-              <input
-                type="text"
-                name="otherCharge.gst"
-                value={otherData.otherCharge.gst}
-                onChange={handleChange}
-                placeholder="GST"
-              />
-              <input
-                type="text"
-                name="otherCharge.finalAmount"
-                value={otherData.otherCharge.finalAmount}
-                onChange={handleChange}
-                placeholder="Final Amount"
-              />
-            </div>
+          </div>
+          <div className="charge-inputs-row">
+            <input
+              type="text"
+              name="otherCharge.taxableAmount"
+              value={otherData.otherCharge.taxableAmount}
+              onChange={handleChange}
+              placeholder="Taxable Amount"
+            />
+            <input
+              type="text"
+              name="otherCharge.gst"
+              value={otherData.otherCharge.gst}
+              onChange={handleChange}
+              placeholder="GST %"
+            />
+            <input
+              type="text"
+              name="otherCharge.finalAmount"
+              value={otherData.otherCharge.finalAmount}
+              onChange={handleChange}
+              placeholder="Final Amount"
+            />
           </div>
         </div>
 
-        <div className="section-title">Optional Details</div>
-        <div className="optional-fields">
-          <div className="form-row">
-            <input
-              type="text"
-              name="optionalField1"
-              value={otherData.optionalField1}
-              onChange={handleChange}
-              placeholder="Optional Field 1"
-            />
-            <input
-              type="text"
-              name="optionalValue1"
-              value={otherData.optionalValue1}
-              onChange={handleChange}
-              placeholder="Optional Value 1"
-            />
-          </div>
-          <div className="form-row">
-            <input
-              type="text"
-              name="optionalField2"
-              value={otherData.optionalField2}
-              onChange={handleChange}
-              placeholder="Optional Field 2"
-            />
-            <input
-              type="text"
-              name="optionalValue2"
-              value={otherData.optionalValue2}
-              onChange={handleChange}
-              placeholder="Optional Value 2"
-            />
-          </div>
+        {/* Optional Custom Details */}
+        <div className="section-heading">Custom Optional Details</div>
+        <div className="optional-grid">
+          <input
+            type="text"
+            name="optionalField1"
+            value={otherData.optionalField1}
+            onChange={handleChange}
+            placeholder="Field Label 1 (e.g. Project Code)"
+          />
+          <input
+            type="text"
+            name="optionalValue1"
+            value={otherData.optionalValue1}
+            onChange={handleChange}
+            placeholder="Field Value 1"
+          />
+        </div>
+        <div className="optional-grid">
+          <input
+            type="text"
+            name="optionalField2"
+            value={otherData.optionalField2}
+            onChange={handleChange}
+            placeholder="Field Label 2 (e.g. Reference No)"
+          />
+          <input
+            type="text"
+            name="optionalValue2"
+            value={otherData.optionalValue2}
+            onChange={handleChange}
+            placeholder="Field Value 2"
+          />
         </div>
       </form>
-      <div className="fixed-bottom-save">
-        <button onClick={handleSubmit}>Save</button>
+
+      {/* Bottom Save Bar */}
+      <div className="fixed-save-bar">
+        <button type="button" className="save-action-btn" onClick={handleSubmit}>
+          Save Other Details
+        </button>
       </div>
     </div>
   );

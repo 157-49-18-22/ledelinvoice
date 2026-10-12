@@ -77,8 +77,42 @@ const initialProducts = [
   }
 ];
 
-// Accept initialInvoiceData prop
-const CreateInvoice = ({ onClose, onSave, initialInvoiceData = null }) => {
+// Helpers for auto-generating GST invoice prefix and sequential numbers
+const getFinancialYearString = (dateObj = new Date()) => {
+  const d = dateObj instanceof Date && !isNaN(dateObj) ? dateObj : new Date();
+  const year = d.getFullYear();
+  const month = d.getMonth(); // 0 is January, 3 is April
+  // Indian Financial Year: April to March
+  const startYear = month >= 3 ? year : year - 1;
+  const endYear = startYear + 1;
+  return `${String(startYear).slice(-2)}-${String(endYear).slice(-2)}`;
+};
+
+const getDefaultPrefix = (dateString = null) => {
+  const d = dateString ? new Date(dateString) : new Date();
+  return `LE/${getFinancialYearString(d)}/`;
+};
+
+const getNextInvoiceNumber = (invoicesList = []) => {
+  let maxNum = 0;
+  if (Array.isArray(invoicesList) && invoicesList.length > 0) {
+    invoicesList.forEach(inv => {
+      const fullNo = String(inv.invoiceNo || inv.number || inv.invoiceNumber || '');
+      const match = fullNo.match(/(\d+)$/);
+      if (match) {
+        const val = parseInt(match[1], 10);
+        if (!isNaN(val) && val > maxNum) {
+          maxNum = val;
+        }
+      }
+    });
+  }
+  const nextVal = maxNum + 1;
+  return String(nextVal).padStart(3, '0');
+};
+
+// Accept initialInvoiceData and invoices prop
+const CreateInvoice = ({ onClose, onSave, initialInvoiceData = null, invoices = [] }) => {
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -104,11 +138,17 @@ const CreateInvoice = ({ onClose, onSave, initialInvoiceData = null }) => {
   const [supplierData, setSupplierData] = useState(effectiveInitialData?.supplierData || null);
   const [invoiceDate, setInvoiceDate] = useState(effectiveInitialData?.date || new Date().toISOString().split('T')[0]); // Default to today
 
-  // Extract prefix and number if invoiceNo exists
+  // Extract prefix and number if invoiceNo exists, otherwise auto-generate
   const initialInvoiceNo = effectiveInitialData?.invoiceNo || '';
   const numberMatch = initialInvoiceNo.match(/\d+$/);
-  const initialNum = numberMatch ? numberMatch[0] : (effectiveInitialData?.invoiceNumber || '');
-  const initialPrefix = initialInvoiceNo.replace(initialNum, '') || (effectiveInitialData?.invoicePrefix || '');
+  const calculatedNextNum = getNextInvoiceNumber(invoices);
+  const calculatedDefaultPrefix = getDefaultPrefix(effectiveInitialData?.date);
+
+  const initialNum = numberMatch
+    ? numberMatch[0]
+    : (effectiveInitialData?.invoiceNumber || (effectiveInitialData?.id ? '' : calculatedNextNum));
+  const initialPrefix = initialInvoiceNo.replace(initialNum, '')
+    || (effectiveInitialData?.invoicePrefix || (effectiveInitialData?.id ? '' : calculatedDefaultPrefix));
 
   const [invoicePrefix, setInvoicePrefix] = useState(initialPrefix);
   const [invoiceNumber, setInvoiceNumber] = useState(initialNum);
@@ -117,6 +157,15 @@ const CreateInvoice = ({ onClose, onSave, initialInvoiceData = null }) => {
   const [discountPercent, setDiscountPercent] = useState(effectiveInitialData?.discountPercent || 0);
   const [tdsEnabled, setTdsEnabled] = useState(effectiveInitialData?.tdsEnabled || false);
   const [tdsPercent, setTdsPercent] = useState(effectiveInitialData?.tdsPercent || 2);
+  const [advancePaid, setAdvancePaid] = useState(effectiveInitialData?.advancePaid || 0);
+  const [consigneeData, setConsigneeData] = useState(effectiveInitialData?.consigneeData || {
+    companyName: '',
+    address: '',
+    gstin: '',
+    state: '',
+    stateCode: ''
+  });
+  const [isConsigneeSaved, setIsConsigneeSaved] = useState(Boolean(effectiveInitialData?.consigneeData?.companyName));
 
   // Other existing state...
   const [showSupplierDetails, setShowSupplierDetails] = useState(false);
@@ -163,6 +212,7 @@ const CreateInvoice = ({ onClose, onSave, initialInvoiceData = null }) => {
       id: invoiceId,
       invoiceType,
       consigneeType,
+      consigneeData,
       gstType,
       selectedBuyer,
       transportData,
@@ -174,6 +224,7 @@ const CreateInvoice = ({ onClose, onSave, initialInvoiceData = null }) => {
       invoicePrefix,
       invoiceNumber,
       discountPercent,
+      advancePaid,
       tdsEnabled,
       tdsPercent,
       products: invoiceProducts,
@@ -181,9 +232,9 @@ const CreateInvoice = ({ onClose, onSave, initialInvoiceData = null }) => {
       signatureImage
     });
   }, [
-    invoiceId, invoiceType, consigneeType, gstType, selectedBuyer,
+    invoiceId, invoiceType, consigneeType, consigneeData, gstType, selectedBuyer,
     transportData, otherData, bankData, supplierData, invoiceDate,
-    invoicePrefix, invoiceNumber, discountPercent, tdsEnabled,
+    invoicePrefix, invoiceNumber, discountPercent, advancePaid, tdsEnabled,
     tdsPercent, invoiceProducts, showSignature, signatureImage
   ]);
 
@@ -202,8 +253,10 @@ const CreateInvoice = ({ onClose, onSave, initialInvoiceData = null }) => {
       if (currentDraft.invoiceNumber !== undefined) setInvoiceNumber(currentDraft.invoiceNumber);
       if (currentDraft.invoiceType !== undefined && currentDraft.invoiceType) setInvoiceType(currentDraft.invoiceType);
       if (currentDraft.consigneeType !== undefined) setConsigneeType(currentDraft.consigneeType);
+      if (currentDraft.consigneeData !== undefined) setConsigneeData(currentDraft.consigneeData);
       if (currentDraft.gstType !== undefined) setGstType(currentDraft.gstType);
       if (currentDraft.discountPercent !== undefined) setDiscountPercent(currentDraft.discountPercent);
+      if (currentDraft.advancePaid !== undefined) setAdvancePaid(currentDraft.advancePaid);
       if (currentDraft.tdsEnabled !== undefined) setTdsEnabled(currentDraft.tdsEnabled);
       if (currentDraft.tdsPercent !== undefined) setTdsPercent(currentDraft.tdsPercent);
     }
@@ -216,6 +269,7 @@ const CreateInvoice = ({ onClose, onSave, initialInvoiceData = null }) => {
       setInvoiceId(initialInvoiceData.id || null);
       setInvoiceType(initialInvoiceData.invoiceType || '');
       setConsigneeType(initialInvoiceData.consigneeType || 'same');
+      setConsigneeData(initialInvoiceData.consigneeData || { companyName: '', address: '', gstin: '', state: '', stateCode: '' });
       setGstType(initialInvoiceData.gstType || 'auto');
       setSelectedBuyer(initialInvoiceData.selectedBuyer || null);
       setTransportData(initialInvoiceData.transportData || null);
@@ -233,6 +287,7 @@ const CreateInvoice = ({ onClose, onSave, initialInvoiceData = null }) => {
       setInvoicePrefix(prefix);
       setInvoiceNumber(num);
       setDiscountPercent(initialInvoiceData.discountPercent || 0);
+      setAdvancePaid(initialInvoiceData.advancePaid || 0);
       setTdsEnabled(initialInvoiceData.tdsEnabled || false);
       setTdsPercent(initialInvoiceData.tdsPercent || 2);
     } else {
@@ -245,14 +300,26 @@ const CreateInvoice = ({ onClose, onSave, initialInvoiceData = null }) => {
       setSelectedBuyer(null);
       // ... reset other fields as needed ...
       setInvoiceDate(new Date().toISOString().split('T')[0]);
-      setInvoicePrefix('');
-      setInvoiceNumber('');
+      setInvoicePrefix(getDefaultPrefix());
+      setInvoiceNumber(getNextInvoiceNumber(invoices));
       setInvoiceProducts([]);
       setDiscountPercent(0);
       setTdsEnabled(false);
       setTdsPercent(2);
     }
-  }, [initialInvoiceData]); // Depend on the prop
+  }, [initialInvoiceData, invoices]); // Depend on prop
+
+  // Auto-fill prefix and next invoice number if new invoice and currently empty
+  useEffect(() => {
+    if (!invoiceId && (!effectiveInitialData || !effectiveInitialData.id)) {
+      if (!invoicePrefix) {
+        setInvoicePrefix(getDefaultPrefix(invoiceDate));
+      }
+      if (!invoiceNumber) {
+        setInvoiceNumber(getNextInvoiceNumber(invoices));
+      }
+    }
+  }, [invoices, invoiceId, effectiveInitialData]);
 
   // Save buyers whenever allBuyers changes
   useEffect(() => {
@@ -411,12 +478,14 @@ const CreateInvoice = ({ onClose, onSave, initialInvoiceData = null }) => {
       date: invoiceDate,
       amount: amountAfterTds, // Use final amount after discount and TDS
       discountPercent: discountPercent,
+      advancePaid: parseFloat(advancePaid) || 0,
       tdsEnabled: tdsEnabled,
       tdsPercent: tdsEnabled ? parsedTdsPercent : 0,
       supplierData: supplierData || {},
       selectedBuyer: buyerData, // Keep for backward compatibility
       buyerData, // This is what InvoiceTemplate expects
       consigneeType,
+      consigneeData: consigneeType === 'same' ? buyerData : (consigneeData || {}),
       gstType, // Add GST type selection
       products: invoiceProducts, // Pass the current list of products
       transportData: transportData || {},
@@ -464,9 +533,18 @@ const CreateInvoice = ({ onClose, onSave, initialInvoiceData = null }) => {
     try { localStorage.removeItem('savedSignatureImage'); } catch (err) {}
   };
 
+  const handleInvoiceDateChange = (e) => {
+    const newDate = e.target.value;
+    setInvoiceDate(newDate);
+    // If invoicePrefix matches standard LE/YY-YY/ or is empty, auto-update financial year
+    if (!invoicePrefix || /^LE\/\d{2}-\d{2}\/$/.test(invoicePrefix)) {
+      setInvoicePrefix(getDefaultPrefix(newDate));
+    }
+  };
+
   const handleInvoiceNumberChange = (e) => {
     const value = e.target.value;
-    if (/^\d{0,3}$/.test(value)) {
+    if (/^\d{0,6}$/.test(value)) {
       setInvoiceNumber(value);
     }
   };
@@ -675,11 +753,11 @@ const CreateInvoice = ({ onClose, onSave, initialInvoiceData = null }) => {
             <h2>Invoice Details</h2>
             <div className="buyer-actions">
               <button className="action-button edit" onClick={() => {
-                setInvoiceDate('');
-                setInvoicePrefix('');
-                setInvoiceNumber('');
+                setInvoiceDate(new Date().toISOString().split('T')[0]);
+                setInvoicePrefix(getDefaultPrefix());
+                setInvoiceNumber(getNextInvoiceNumber(invoices));
               }}>
-                Edit
+                Reset
               </button>
               <button className="action-button delete" onClick={() => {
                 if (window.confirm('Are you sure you want to clear invoice details?')) {
@@ -688,7 +766,7 @@ const CreateInvoice = ({ onClose, onSave, initialInvoiceData = null }) => {
                   setInvoiceNumber('');
                 }
               }}>
-                <span>🗑️</span> Delete
+                <span>🗑️</span> Clear
               </button>
             </div>
           </div>
@@ -698,16 +776,15 @@ const CreateInvoice = ({ onClose, onSave, initialInvoiceData = null }) => {
               <input
                 type="date"
                 value={invoiceDate}
-                onChange={(e) => setInvoiceDate(e.target.value)}
+                onChange={handleInvoiceDateChange}
                 className="date-input"
-                min={new Date().toISOString().split('T')[0]}
               />
             </div>
             <div className="detail-field">
               <label>Invoice Prefix</label>
               <input
                 type="text"
-                placeholder="Enter prefix"
+                placeholder="e.g. LE/26-27/"
                 value={invoicePrefix}
                 onChange={(e) => setInvoicePrefix(e.target.value)}
               />
@@ -716,14 +793,19 @@ const CreateInvoice = ({ onClose, onSave, initialInvoiceData = null }) => {
               <label>Invoice No.</label>
               <input
                 type="text"
-                placeholder="Enter invoice number (max 3 digits)"
+                placeholder="e.g. 001"
                 value={invoiceNumber}
                 onChange={handleInvoiceNumberChange}
-                maxLength={3}
-                pattern="\d{0,3}"
+                maxLength={6}
               />
             </div>
           </div>
+          {(invoicePrefix || invoiceNumber) && (
+            <div className="invoice-no-preview">
+              <span className="preview-label">Full Invoice No:</span>
+              <span className="preview-badge">{invoicePrefix}{invoiceNumber}</span>
+            </div>
+          )}
         </div>
 
         <section className="form-section">
@@ -859,6 +941,137 @@ const CreateInvoice = ({ onClose, onSave, initialInvoiceData = null }) => {
               Add Consignee (If different from above)
             </label>
           </div>
+          {consigneeType === 'different' && (
+            <div style={{ marginTop: '16px' }}>
+              {isConsigneeSaved && consigneeData?.companyName ? (
+                <div className="details-summary" style={{ background: '#f8fafc', border: '1px solid #cbd5e1', borderRadius: '8px', padding: '14px' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px', borderBottom: '1px solid #e2e8f0', paddingBottom: '8px' }}>
+                    <span style={{ fontWeight: 700, color: '#16a34a', fontSize: '13px' }}>✓ Consignee Details Saved</span>
+                    <div className="buyer-actions" style={{ margin: 0 }}>
+                      <button
+                        type="button"
+                        className="action-button edit"
+                        onClick={() => setIsConsigneeSaved(false)}
+                      >
+                        Edit
+                      </button>
+                      <button
+                        type="button"
+                        className="action-button delete"
+                        style={{ marginLeft: '8px' }}
+                        onClick={() => {
+                          setConsigneeData({ companyName: '', address: '', gstin: '', state: '', stateCode: '' });
+                          setIsConsigneeSaved(false);
+                          syncDraft();
+                        }}
+                      >
+                        <span>🗑️</span> Clear
+                      </button>
+                    </div>
+                  </div>
+                  <div className="summary-row">
+                    <span className="summary-label">Company:</span>
+                    <span className="summary-value">{consigneeData.companyName}</span>
+                  </div>
+                  <div className="summary-row">
+                    <span className="summary-label">Address:</span>
+                    <span className="summary-value">{consigneeData.address}</span>
+                  </div>
+                  {consigneeData.gstin && (
+                    <div className="summary-row">
+                      <span className="summary-label">GSTIN:</span>
+                      <span className="summary-value">{consigneeData.gstin}</span>
+                    </div>
+                  )}
+                  {consigneeData.state && (
+                    <div className="summary-row">
+                      <span className="summary-label">State:</span>
+                      <span className="summary-value">{consigneeData.state} {consigneeData.stateCode ? `(${consigneeData.stateCode})` : ''}</span>
+                    </div>
+                  )}
+                </div>
+              ) : (
+                <div style={{ padding: '16px', background: '#f8fafc', borderRadius: '8px', border: '1px solid #cbd5e1' }}>
+                  <h3 style={{ fontSize: '13px', fontWeight: 700, marginBottom: '12px', color: '#1e293b' }}>Consignee (Ship to) Address</h3>
+                  <div className="form-group" style={{ marginBottom: '10px' }}>
+                    <label style={{ fontSize: '12px', fontWeight: 600 }}>Company / Receiver Name <span style={{ color: 'red' }}>*</span></label>
+                    <input
+                      type="text"
+                      value={consigneeData?.companyName || ''}
+                      onChange={(e) => setConsigneeData({ ...consigneeData, companyName: e.target.value })}
+                      placeholder="Enter Consignee Name"
+                      style={{ width: '100%', padding: '8px 12px', borderRadius: '6px', border: '1px solid #cbd5e1', fontSize: '13px' }}
+                    />
+                  </div>
+                  <div className="form-group" style={{ marginBottom: '10px' }}>
+                    <label style={{ fontSize: '12px', fontWeight: 600 }}>Address <span style={{ color: 'red' }}>*</span></label>
+                    <textarea
+                      value={consigneeData?.address || ''}
+                      onChange={(e) => setConsigneeData({ ...consigneeData, address: e.target.value })}
+                      placeholder="Enter Complete Address"
+                      rows={2}
+                      style={{ width: '100%', padding: '8px 12px', borderRadius: '6px', border: '1px solid #cbd5e1', fontSize: '13px' }}
+                    />
+                  </div>
+                  <div style={{ display: 'flex', gap: '10px', marginBottom: '14px' }}>
+                    <div className="form-group" style={{ flex: 1 }}>
+                      <label style={{ fontSize: '12px', fontWeight: 600 }}>GSTIN</label>
+                      <input
+                        type="text"
+                        value={consigneeData?.gstin || ''}
+                        onChange={(e) => setConsigneeData({ ...consigneeData, gstin: e.target.value })}
+                        placeholder="GSTIN"
+                        style={{ width: '100%', padding: '8px 12px', borderRadius: '6px', border: '1px solid #cbd5e1', fontSize: '13px' }}
+                      />
+                    </div>
+                    <div className="form-group" style={{ flex: 1 }}>
+                      <label style={{ fontSize: '12px', fontWeight: 600 }}>State</label>
+                      <input
+                        type="text"
+                        value={consigneeData?.state || ''}
+                        onChange={(e) => setConsigneeData({ ...consigneeData, state: e.target.value })}
+                        placeholder="State"
+                        style={{ width: '100%', padding: '8px 12px', borderRadius: '6px', border: '1px solid #cbd5e1', fontSize: '13px' }}
+                      />
+                    </div>
+                    <div className="form-group" style={{ flex: '0 0 90px' }}>
+                      <label style={{ fontSize: '12px', fontWeight: 600 }}>State Code</label>
+                      <input
+                        type="text"
+                        value={consigneeData?.stateCode || ''}
+                        onChange={(e) => setConsigneeData({ ...consigneeData, stateCode: e.target.value })}
+                        placeholder="e.g. 06"
+                        style={{ width: '100%', padding: '8px 12px', borderRadius: '6px', border: '1px solid #cbd5e1', fontSize: '13px' }}
+                      />
+                    </div>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (!consigneeData?.companyName?.trim()) {
+                        alert('Please enter Consignee Company / Receiver Name');
+                        return;
+                      }
+                      setIsConsigneeSaved(true);
+                      syncDraft();
+                    }}
+                    style={{
+                      background: '#16a34a',
+                      color: '#fff',
+                      border: 'none',
+                      borderRadius: '6px',
+                      padding: '8px 20px',
+                      fontWeight: 600,
+                      fontSize: '13px',
+                      cursor: 'pointer'
+                    }}
+                  >
+                    Save Consignee
+                  </button>
+                </div>
+              )}
+            </div>
+          )}
         </section>
 
         <section className="form-section">
@@ -1042,6 +1255,24 @@ const CreateInvoice = ({ onClose, onSave, initialInvoiceData = null }) => {
 
         <section className="form-section">
           <div className="section-header">
+            <h2>Advance Payment ( Optional )</h2>
+          </div>
+          <div className="detail-row">
+            <div className="detail-field">
+              <label>Advance Amount Paid / Received (₹)</label>
+              <input
+                type="number"
+                min="0"
+                value={advancePaid}
+                onChange={(e) => setAdvancePaid(e.target.value)}
+                placeholder="Enter advance amount (e.g. 30000)"
+              />
+            </div>
+          </div>
+        </section>
+
+        <section className="form-section">
+          <div className="section-header">
             <h2>Transportation Details ( Optional )</h2>
             {transportData && (
               <div className="buyer-actions">
@@ -1104,7 +1335,11 @@ const CreateInvoice = ({ onClose, onSave, initialInvoiceData = null }) => {
           </div>
           {otherData ? (
             <div className="details-summary">
-              <span>Other Details Added</span>
+              {otherData.poNumber && <div className="summary-row"><span className="summary-label">PO No:</span> <span className="summary-value">{otherData.poNumber}</span></div>}
+              {otherData.poDate && <div className="summary-row"><span className="summary-label">PO Date:</span> <span className="summary-value">{otherData.poDate}</span></div>}
+              {otherData.paymentTerms && <div className="summary-row"><span className="summary-label">Payment Terms:</span> <span className="summary-value">{otherData.paymentTerms}</span></div>}
+              {otherData.termsOfDelivery && <div className="summary-row"><span className="summary-label">Terms of Delivery:</span> <span className="summary-value">{otherData.termsOfDelivery}</span></div>}
+              {otherData.ewayBillNumber && <div className="summary-row"><span className="summary-label">E-Way Bill:</span> <span className="summary-value">{otherData.ewayBillNumber}</span></div>}
             </div>
           ) : (
             <button className="add-button" onClick={() => { syncDraft(); navigate('/other-details'); }}>

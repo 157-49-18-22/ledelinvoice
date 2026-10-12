@@ -1,5 +1,4 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import './shared.css';
 import './ProductDetails.css';
 
 const ProductDetails = ({ onClose, onSave, initialData = null }) => {
@@ -54,351 +53,420 @@ const ProductDetails = ({ onClose, onSave, initialData = null }) => {
     }));
   };
 
+  const handleTypeSelect = (typeVal) => {
+    setProductData(prev => ({ ...prev, type: typeVal }));
+  };
+
+  const handleTaxTypeSelect = (taxTypeVal) => {
+    setProductData(prev => ({ ...prev, taxType: taxTypeVal }));
+  };
+
   const handleSubmit = (e) => {
-    e.preventDefault();
+    if (e) e.preventDefault();
     if (!productData.name || !productData.salePrice) {
-      alert('Please fill in all required fields');
+      alert('Please fill in all required fields (Item Name and Sale Price)');
       return;
     }
     onSave(productData);
   };
 
+  const basePriceNum = parseFloat(productData.salePrice || 0);
+  const gstRateNum = parseFloat(productData.gst || 0);
+  const cessRateNum = parseFloat(productData.cess || 0);
+  const gstAmount = (basePriceNum * gstRateNum) / 100;
+  const cessAmount = (basePriceNum * cessRateNum) / 100;
+  const finalAmount = basePriceNum + gstAmount + cessAmount;
+
   return (
-    <div className="details-page">
-      <header className="details-header">
-        <div className="header-left">
-          <button className="back-button" onClick={onClose}>←</button>
-          <h1>{initialData ? 'Edit Product' : 'Add Product'}</h1>
-        </div>
+    <div className="product-details-container">
+      {/* Top Header */}
+      <header className="product-header">
+        <button className="product-back-btn" onClick={onClose} type="button" title="Back">
+          ←
+        </button>
+        <h1>{initialData ? 'EDIT PRODUCT' : 'ADD PRODUCT'}</h1>
       </header>
 
-      <div className="tabs">
-        <button
-          className={`tab ${activeTab === 'basic' ? 'active' : ''}`}
-          onClick={() => setActiveTab('basic')}
-        >
-          Basic Details
-        </button>
-        <button
-          className={`tab ${activeTab === 'optional' ? 'active' : ''}`}
-          onClick={() => setActiveTab('optional')}
-        >
-          Optional Details
-        </button>
-      </div>
+      {/* Main Content Area */}
+      <div className="product-form-wrapper">
+        {/* Navigation Tabs */}
+        <div className="product-nav-tabs">
+          <button
+            type="button"
+            className={`product-tab-btn ${activeTab === 'basic' ? 'active' : ''}`}
+            onClick={() => setActiveTab('basic')}
+          >
+            Basic Details
+          </button>
+          <button
+            type="button"
+            className={`product-tab-btn ${activeTab === 'optional' ? 'active' : ''}`}
+            onClick={() => setActiveTab('optional')}
+          >
+            Optional Details
+          </button>
+        </div>
 
-      <form className="details-form" onSubmit={handleSubmit}>
-        {activeTab === 'basic' && (
-          <div className="basic-details">
-            <div className="form-group">
-              <label htmlFor="name">
-                Item Name
-                <span className="required">*</span>
-              </label>
-              <input
-                type="text"
-                id="name"
-                name="name"
-                value={productData.name}
-                onChange={handleChange}
-                placeholder="Enter item name"
-                required
-              />
-            </div>
-
-            <div className="form-group">
-              <label>Item Type</label>
-              <div className="radio-group">
-                <label className="radio-label">
-                  <input
-                    type="radio"
-                    name="type"
-                    value="goods"
-                    checked={productData.type === 'goods'}
-                    onChange={handleChange}
-                  />
-                  <span>Goods</span>
+        <form className="product-inner-form" onSubmit={handleSubmit}>
+          {activeTab === 'basic' && (
+            <div className="tab-pane-content">
+              {/* Item Name */}
+              <div className="field-block">
+                <label htmlFor="name" className="field-label">
+                  Item Name <span className="req-star">*</span>
                 </label>
-                <label className="radio-label">
-                  <input
-                    type="radio"
-                    name="type"
-                    value="services"
-                    checked={productData.type === 'services'}
-                    onChange={handleChange}
-                  />
-                  <span>Services</span>
-                </label>
-              </div>
-            </div>
-
-            <div className="form-group">
-              <label htmlFor="description">Description</label>
-              <textarea
-                id="description"
-                name="description"
-                value={productData.description}
-                onChange={handleChange}
-                placeholder="Enter description"
-                rows="3"
-              />
-            </div>
-
-            <div className="form-group">
-              <label htmlFor="hsn">HSN/SAC</label>
-              <input
-                type="text"
-                id="hsn"
-                name="hsn"
-                value={productData.hsn}
-                onChange={handleChange}
-                placeholder="Enter HSN/SAC code"
-              />
-            </div>
-
-            <div className="form-group">
-              <label htmlFor="salePrice">
-                Sale Price
-                <span className="required">*</span>
-              </label>
-              <input
-                type="number"
-                id="salePrice"
-                name="salePrice"
-                value={productData.salePrice}
-                onChange={handleChange}
-                placeholder="Enter sale price"
-                required
-              />
-            </div>
-
-            <div className="price-calculations">
-              <h3>Price Breakdown</h3>
-              <div className="calc-row">
-                <span>Base Price:</span>
-                <span className="amount">₹{parseFloat(productData.salePrice || 0).toFixed(2)}</span>
-              </div>
-              <div className="calc-row">
-                <span>GST ({productData.gst}%):</span>
-                <span className="amount">₹{((parseFloat(productData.salePrice || 0) * parseFloat(productData.gst || 0)) / 100).toFixed(2)}</span>
-              </div>
-              <div className="calc-row">
-                <span>CESS ({productData.cess}%):</span>
-                <span className="amount">₹{((parseFloat(productData.salePrice || 0) * parseFloat(productData.cess || 0)) / 100).toFixed(2)}</span>
-              </div>
-              <div className="calc-row total">
-                <span>Final Amount:</span>
-                <span className="amount">₹{(
-                  parseFloat(productData.salePrice || 0) + 
-                  (parseFloat(productData.salePrice || 0) * parseFloat(productData.gst || 0)) / 100 +
-                  (parseFloat(productData.salePrice || 0) * parseFloat(productData.cess || 0)) / 100
-                ).toFixed(2)}</span>
-              </div>
-            </div>
-
-            <div className="form-group">
-              <label htmlFor="unit">Unit</label>
-              <select
-                id="unit"
-                name="unit"
-                value={productData.unit}
-                onChange={handleChange}
-              >
-                <option value="">Select Unit</option>
-                <option value="pcs">PCS</option>
-                <option value="kg">KG</option>
-                <option value="g">G</option>
-                <option value="l">L</option>
-                <option value="ml">ML</option>
-              </select>
-            </div>
-
-            <div className="tax-type">
-              <div className="toggle-switch">
-                <span className={productData.taxType === 'inclusive' ? 'active' : ''}>Tax Inclusive</span>
-                <div 
-                  className={`toggle-track ${productData.taxType === 'exclusive' ? 'active' : ''}`}
-                  onClick={() => handleChange({ target: { name: 'taxType', value: productData.taxType === 'inclusive' ? 'exclusive' : 'inclusive' } })}
-                >
-                  <div className="toggle-thumb" />
-                </div>
-                <span className={productData.taxType === 'exclusive' ? 'active' : ''}>Tax Exclusive</span>
-              </div>
-            </div>
-
-            <div className="form-row">
-              <div className="form-group">
-                <label>GST (%)</label>
-                <select
-                  name="gst"
-                  value={productData.gst}
-                  onChange={handleChange}
-                >
-                  <option value="0">GST @ 0</option>
-                  <option value="5">GST @ 5%</option>
-                  <option value="12">GST @ 12%</option>
-                  <option value="18">GST @ 18%</option>
-                  <option value="28">GST @ 28%</option>
-                </select>
-              </div>
-              <div className="form-group">
-                <label>CESS</label>
-                <select
-                  name="cess"
-                  value={productData.cess}
-                  onChange={handleChange}
-                >
-                  <option value="0">(% Percent wise)</option>
-                  <option value="1">1%</option>
-                  <option value="2">2%</option>
-                  <option value="5">5%</option>
-                </select>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {activeTab === 'optional' && (
-          <div className="optional-details">
-            <div className="form-row">
-              <div className="form-group">
-                <label htmlFor="purchasePrice">Purchase Price</label>
                 <input
-                  type="number"
-                  id="purchasePrice"
-                  name="purchasePrice"
-                  value={productData.purchasePrice}
+                  type="text"
+                  id="name"
+                  name="name"
+                  className="field-input"
+                  value={productData.name}
                   onChange={handleChange}
-                  placeholder="Enter purchase price"
+                  placeholder="Enter item name"
+                  required
                 />
               </div>
-              <div className="form-group">
-                <label htmlFor="wholesalePrice">Wholesale Price</label>
-                <input
-                  type="number"
-                  id="wholesalePrice"
-                  name="wholesalePrice"
-                  value={productData.wholesalePrice}
-                  onChange={handleChange}
-                  placeholder="Enter wholesale price"
-                />
-              </div>
-            </div>
 
-            <div className="form-group">
-              <label htmlFor="minWholesaleQty">Minimum Wholesale Quantity</label>
-              <input
-                type="number"
-                id="minWholesaleQty"
-                name="minWholesaleQty"
-                value={productData.minWholesaleQty}
-                onChange={handleChange}
-                placeholder="Enter minimum wholesale quantity"
-              />
-            </div>
-
-            <div className="form-group">
-              <label className="checkbox-label">
-                <input
-                  type="checkbox"
-                  name="maintainStock"
-                  checked={productData.maintainStock}
-                  onChange={handleChange}
-                />
-                <span>Maintain Stock</span>
-              </label>
-            </div>
-
-            {productData.maintainStock && (
-              <>
-                <div className="form-row">
-                  <div className="form-group">
-                    <label htmlFor="openingStock">Opening Stock</label>
-                    <input
-                      type="number"
-                      id="openingStock"
-                      name="openingStock"
-                      value={productData.openingStock}
-                      onChange={handleChange}
-                      placeholder="Enter opening stock"
-                    />
+              {/* Item Type (Goods / Services) as modern selectable cards */}
+              <div className="field-block">
+                <label className="field-label">Item Type</label>
+                <div className="type-pills-group">
+                  <div
+                    className={`type-card-pill ${productData.type === 'goods' ? 'active' : ''}`}
+                    onClick={() => handleTypeSelect('goods')}
+                  >
+                    <span className="pill-radio-indicator"></span>
+                    <span className="pill-icon">📦</span>
+                    <span className="pill-label">Goods</span>
                   </div>
-                  <div className="form-group">
-                    <label htmlFor="openingStockUnit">Unit</label>
-                    <select
-                      id="openingStockUnit"
-                      name="openingStockUnit"
-                      value={productData.openingStockUnit}
-                      onChange={handleChange}
-                    >
-                      <option value="">Select Unit</option>
-                      <option value="pcs">PCS</option>
-                      <option value="kg">KG</option>
-                      <option value="g">G</option>
-                      <option value="l">L</option>
-                      <option value="ml">ML</option>
-                    </select>
+                  <div
+                    className={`type-card-pill ${productData.type === 'services' ? 'active' : ''}`}
+                    onClick={() => handleTypeSelect('services')}
+                  >
+                    <span className="pill-radio-indicator"></span>
+                    <span className="pill-icon">🛠️</span>
+                    <span className="pill-label">Services</span>
                   </div>
                 </div>
+              </div>
 
-                <div className="form-group">
-                  <label htmlFor="openingStockDate">As of Date</label>
+              {/* Description */}
+              <div className="field-block">
+                <label htmlFor="description" className="field-label">Description</label>
+                <textarea
+                  id="description"
+                  name="description"
+                  className="field-textarea"
+                  value={productData.description}
+                  onChange={handleChange}
+                  placeholder="Enter item description or specifications..."
+                  rows="3"
+                />
+              </div>
+
+              {/* HSN & Sale Price Row */}
+              <div className="fields-grid-2">
+                <div className="field-block">
+                  <label htmlFor="hsn" className="field-label">HSN/SAC Code</label>
                   <input
-                    type="date"
-                    id="openingStockDate"
-                    name="openingStockDate"
-                    value={productData.openingStockDate}
+                    type="text"
+                    id="hsn"
+                    name="hsn"
+                    className="field-input"
+                    value={productData.hsn}
                     onChange={handleChange}
+                    placeholder="Enter HSN/SAC code"
                   />
                 </div>
-
-                <div className="form-group">
-                  <label htmlFor="lowStockAlert">Low Stock Alert</label>
+                <div className="field-block">
+                  <label htmlFor="salePrice" className="field-label">
+                    Sale Price (₹) <span className="req-star">*</span>
+                  </label>
                   <input
                     type="number"
-                    id="lowStockAlert"
-                    name="lowStockAlert"
-                    value={productData.lowStockAlert}
+                    id="salePrice"
+                    name="salePrice"
+                    className="field-input price-input"
+                    value={productData.salePrice}
                     onChange={handleChange}
-                    placeholder="Enter low stock alert quantity"
+                    placeholder="0.00"
+                    required
                   />
                 </div>
-              </>
-            )}
-
-            <div className="form-row">
-              <div className="form-group">
-                <label htmlFor="barcode">Barcode</label>
-                <input
-                  type="text"
-                  id="barcode"
-                  name="barcode"
-                  value={productData.barcode}
-                  onChange={handleChange}
-                  placeholder="Enter barcode"
-                />
               </div>
-              <div className="form-group">
-                <label htmlFor="itemCode">Item Code</label>
-                <input
-                  type="text"
-                  id="itemCode"
-                  name="itemCode"
-                  value={productData.itemCode}
+
+              {/* Price Calculations Card */}
+              {basePriceNum > 0 && (
+                <div className="price-breakdown-card">
+                  <div className="breakdown-header">Price Calculation Breakdown</div>
+                  <div className="breakdown-grid">
+                    <div className="breakdown-item">
+                      <span className="b-label">Base Price:</span>
+                      <span className="b-val">₹{basePriceNum.toFixed(2)}</span>
+                    </div>
+                    <div className="breakdown-item">
+                      <span className="b-label">GST ({productData.gst}%):</span>
+                      <span className="b-val">₹{gstAmount.toFixed(2)}</span>
+                    </div>
+                    {cessRateNum > 0 && (
+                      <div className="breakdown-item">
+                        <span className="b-label">CESS ({productData.cess}%):</span>
+                        <span className="b-val">₹{cessAmount.toFixed(2)}</span>
+                      </div>
+                    )}
+                    <div className="breakdown-item final-item">
+                      <span className="b-label">Final Amount:</span>
+                      <span className="b-val total-price">₹{finalAmount.toFixed(2)}</span>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Unit Dropdown */}
+              <div className="field-block">
+                <label htmlFor="unit" className="field-label">Unit of Measurement</label>
+                <select
+                  id="unit"
+                  name="unit"
+                  className="field-select"
+                  value={productData.unit}
                   onChange={handleChange}
-                  placeholder="Enter item code"
-                />
+                >
+                  <option value="">Select Unit</option>
+                  <option value="pcs">PCS (Pieces)</option>
+                  <option value="nos">NOS (Numbers)</option>
+                  <option value="kg">KG (Kilograms)</option>
+                  <option value="g">G (Grams)</option>
+                  <option value="mtr">MTR (Meters)</option>
+                  <option value="l">L (Liters)</option>
+                  <option value="ml">ML (Milliliters)</option>
+                  <option value="box">BOX (Boxes)</option>
+                  <option value="set">SET (Sets)</option>
+                  <option value="sqft">SQFT (Square Feet)</option>
+                </select>
+              </div>
+
+              {/* Tax Type Segmented Toggle */}
+              <div className="field-block">
+                <label className="field-label">Tax Preference</label>
+                <div className="tax-preference-tabs">
+                  <button
+                    type="button"
+                    className={`tax-pref-btn ${productData.taxType === 'inclusive' ? 'active' : ''}`}
+                    onClick={() => handleTaxTypeSelect('inclusive')}
+                  >
+                    Tax Inclusive
+                  </button>
+                  <button
+                    type="button"
+                    className={`tax-pref-btn ${productData.taxType === 'exclusive' ? 'active' : ''}`}
+                    onClick={() => handleTaxTypeSelect('exclusive')}
+                  >
+                    Tax Exclusive
+                  </button>
+                </div>
+              </div>
+
+              {/* GST & CESS Row */}
+              <div className="fields-grid-2">
+                <div className="field-block">
+                  <label htmlFor="gst" className="field-label">GST Rate</label>
+                  <select
+                    id="gst"
+                    name="gst"
+                    className="field-select"
+                    value={productData.gst}
+                    onChange={handleChange}
+                  >
+                    <option value="0">GST @ 0% (Exempt)</option>
+                    <option value="5">GST @ 5%</option>
+                    <option value="12">GST @ 12%</option>
+                    <option value="18">GST @ 18%</option>
+                    <option value="28">GST @ 28%</option>
+                  </select>
+                </div>
+                <div className="field-block">
+                  <label htmlFor="cess" className="field-label">CESS (%)</label>
+                  <select
+                    id="cess"
+                    name="cess"
+                    className="field-select"
+                    value={productData.cess}
+                    onChange={handleChange}
+                  >
+                    <option value="0">0% (None)</option>
+                    <option value="1">1%</option>
+                    <option value="2">2%</option>
+                    <option value="5">5%</option>
+                  </select>
+                </div>
               </div>
             </div>
-          </div>
-        )}
-      </form>
+          )}
 
-      <button className="save-button-bottom" onClick={handleSubmit}>
-        SAVE
-      </button>
+          {activeTab === 'optional' && (
+            <div className="tab-pane-content">
+              {/* Purchase & Wholesale Price */}
+              <div className="fields-grid-2">
+                <div className="field-block">
+                  <label htmlFor="purchasePrice" className="field-label">Purchase Price (₹)</label>
+                  <input
+                    type="number"
+                    id="purchasePrice"
+                    name="purchasePrice"
+                    className="field-input"
+                    value={productData.purchasePrice}
+                    onChange={handleChange}
+                    placeholder="Enter purchase price"
+                  />
+                </div>
+                <div className="field-block">
+                  <label htmlFor="wholesalePrice" className="field-label">Wholesale Price (₹)</label>
+                  <input
+                    type="number"
+                    id="wholesalePrice"
+                    name="wholesalePrice"
+                    className="field-input"
+                    value={productData.wholesalePrice}
+                    onChange={handleChange}
+                    placeholder="Enter wholesale price"
+                  />
+                </div>
+              </div>
+
+              {/* Minimum Wholesale Qty */}
+              <div className="field-block">
+                <label htmlFor="minWholesaleQty" className="field-label">Minimum Wholesale Quantity</label>
+                <input
+                  type="number"
+                  id="minWholesaleQty"
+                  name="minWholesaleQty"
+                  className="field-input"
+                  value={productData.minWholesaleQty}
+                  onChange={handleChange}
+                  placeholder="e.g. 10"
+                />
+              </div>
+
+              {/* Maintain Stock Switch Card */}
+              <div className="stock-toggle-card">
+                <label className="stock-checkbox-label">
+                  <input
+                    type="checkbox"
+                    name="maintainStock"
+                    checked={productData.maintainStock}
+                    onChange={handleChange}
+                  />
+                  <div className="stock-text">
+                    <span className="stock-title">Maintain Stock / Inventory</span>
+                    <span className="stock-desc">Track opening stock, balance and low stock alerts</span>
+                  </div>
+                </label>
+              </div>
+
+              {productData.maintainStock && (
+                <div className="stock-details-section">
+                  <div className="fields-grid-2">
+                    <div className="field-block">
+                      <label htmlFor="openingStock" className="field-label">Opening Stock Quantity</label>
+                      <input
+                        type="number"
+                        id="openingStock"
+                        name="openingStock"
+                        className="field-input"
+                        value={productData.openingStock}
+                        onChange={handleChange}
+                        placeholder="e.g. 100"
+                      />
+                    </div>
+                    <div className="field-block">
+                      <label htmlFor="openingStockUnit" className="field-label">Stock Unit</label>
+                      <select
+                        id="openingStockUnit"
+                        name="openingStockUnit"
+                        className="field-select"
+                        value={productData.openingStockUnit}
+                        onChange={handleChange}
+                      >
+                        <option value="">Select Unit</option>
+                        <option value="pcs">PCS</option>
+                        <option value="kg">KG</option>
+                        <option value="g">G</option>
+                        <option value="l">L</option>
+                        <option value="ml">ML</option>
+                        <option value="box">BOX</option>
+                      </select>
+                    </div>
+                  </div>
+
+                  <div className="fields-grid-2">
+                    <div className="field-block">
+                      <label htmlFor="openingStockDate" className="field-label">As of Date</label>
+                      <input
+                        type="date"
+                        id="openingStockDate"
+                        name="openingStockDate"
+                        className="field-input"
+                        value={productData.openingStockDate}
+                        onChange={handleChange}
+                      />
+                    </div>
+                    <div className="field-block">
+                      <label htmlFor="lowStockAlert" className="field-label">Low Stock Alert Qty</label>
+                      <input
+                        type="number"
+                        id="lowStockAlert"
+                        name="lowStockAlert"
+                        className="field-input"
+                        value={productData.lowStockAlert}
+                        onChange={handleChange}
+                        placeholder="e.g. 10"
+                      />
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Barcode & Item Code */}
+              <div className="fields-grid-2">
+                <div className="field-block">
+                  <label htmlFor="barcode" className="field-label">Barcode</label>
+                  <input
+                    type="text"
+                    id="barcode"
+                    name="barcode"
+                    className="field-input"
+                    value={productData.barcode}
+                    onChange={handleChange}
+                    placeholder="Enter barcode"
+                  />
+                </div>
+                <div className="field-block">
+                  <label htmlFor="itemCode" className="field-label">Item Code / SKU</label>
+                  <input
+                    type="text"
+                    id="itemCode"
+                    name="itemCode"
+                    className="field-input"
+                    value={productData.itemCode}
+                    onChange={handleChange}
+                    placeholder="Enter item code / SKU"
+                  />
+                </div>
+              </div>
+            </div>
+          )}
+        </form>
+      </div>
+
+      {/* Fixed Bottom Save Button */}
+      <div className="product-bottom-bar">
+        <button className="product-save-action-btn" type="button" onClick={handleSubmit}>
+          Save Product
+        </button>
+      </div>
     </div>
   );
 };
 
-export default ProductDetails; 
+export default ProductDetails;

@@ -26,6 +26,9 @@ const SupplierDetails = ({ onClose, onSave = () => {}, initialData, viewOnly = f
     address: '',
     gstin: '',
     pan: '',
+    msme: '',
+    state: '',
+    stateCode: '',
     contactPerson: '',
     notes: '',
     logo: null,
@@ -51,6 +54,9 @@ const SupplierDetails = ({ onClose, onSave = () => {}, initialData, viewOnly = f
       address: '',
       gstin: '',
       pan: '',
+      msme: '',
+      state: '',
+      stateCode: '',
       contactPerson: '',
       notes: '',
       logo: null,
@@ -216,6 +222,8 @@ const SupplierDetails = ({ onClose, onSave = () => {}, initialData, viewOnly = f
           {formData.address && <div className="summary-row"><span className="summary-label">Address:</span> <span className="summary-value">{formData.address}</span></div>}
           {formData.gstin && <div className="summary-row"><span className="summary-label">GSTIN:</span> <span className="summary-value">{formData.gstin}</span></div>}
           {formData.pan && <div className="summary-row"><span className="summary-label">PAN:</span> <span className="summary-value">{formData.pan}</span></div>}
+          {formData.msme && <div className="summary-row"><span className="summary-label">MSME / Udyam:</span> <span className="summary-value">{formData.msme}</span></div>}
+          {formData.state && <div className="summary-row"><span className="summary-label">State:</span> <span className="summary-value">{formData.state} {formData.stateCode ? `(${formData.stateCode})` : ''}</span></div>}
           {formData.contactPerson && <div className="summary-row"><span className="summary-label">Contact Person:</span> <span className="summary-value">{formData.contactPerson}</span></div>}
           {formData.notes && <div className="summary-row"><span className="summary-label">Notes:</span> <span className="summary-value">{formData.notes}</span></div>}
         </div>
@@ -332,6 +340,20 @@ const SupplierDetails = ({ onClose, onSave = () => {}, initialData, viewOnly = f
         <div className="form-group">
           <label htmlFor="pan">PAN</label>
           <input type="text" id="pan" name="pan" value={formData.pan} onChange={e => setFormData({...formData, pan: e.target.value})} placeholder="PAN" />
+        </div>
+        <div className="form-group">
+          <label htmlFor="msme">MSME / Udyam Registration No.</label>
+          <input type="text" id="msme" name="msme" value={formData.msme || ''} onChange={e => setFormData({...formData, msme: e.target.value})} placeholder="e.g. UDYAM-HR-12-0058416" />
+        </div>
+        <div className="form-row" style={{ display: 'flex', gap: '15px' }}>
+          <div className="form-group" style={{ flex: 2 }}>
+            <label htmlFor="state">State</label>
+            <input type="text" id="state" name="state" value={formData.state || ''} onChange={e => setFormData({...formData, state: e.target.value})} placeholder="e.g. Haryana" />
+          </div>
+          <div className="form-group" style={{ flex: 1 }}>
+            <label htmlFor="stateCode">State Code</label>
+            <input type="text" id="stateCode" name="stateCode" value={formData.stateCode || ''} onChange={e => setFormData({...formData, stateCode: e.target.value})} placeholder="e.g. 06" />
+          </div>
         </div>
           <div className="form-group">
           <label htmlFor="contactPerson">Contact Person</label>

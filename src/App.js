@@ -119,7 +119,7 @@ function DashboardPage({
   );
 }
 
-function CreateInvoicePage({ onSave }) {
+function CreateInvoicePage({ onSave, invoices = [] }) {
   const navigate = useNavigate();
   const draft = getDraft();
 
@@ -135,6 +135,7 @@ function CreateInvoicePage({ onSave }) {
         navigate('/');
       }}
       initialInvoiceData={draft}
+      invoices={invoices}
     />
   );
 }
@@ -159,6 +160,7 @@ function EditInvoicePage({ invoices, onSave }) {
         navigate('/');
       }}
       initialInvoiceData={invoiceData}
+      invoices={invoices}
     />
   );
 }
@@ -540,7 +542,13 @@ function App() {
           ...invoiceData,
           type: invoiceData.invoiceType || 'tax-invoice',
           amount: invoiceData.amount || 0,
+          advancePaid: Number(invoiceData.advancePaid) || 0,
+          consigneeType: invoiceData.consigneeType || 'same',
+          consigneeData: invoiceData.consigneeData || {},
           number: invoiceData.invoiceNo || String(invoices.length + 1),
+          invoiceNo: invoiceData.invoiceNo || String(invoices.length + 1),
+          invoicePrefix: invoiceData.invoicePrefix || '',
+          invoiceNumber: invoiceData.invoiceNumber || '',
           date: invoiceData.date || new Date().toLocaleDateString('en-IN'),
           status: invoiceData.status || 'unpaid',
           selectedBuyer: invoiceData.selectedBuyer || {},
@@ -560,7 +568,15 @@ function App() {
           ...invoiceData,
           type: String(invoiceData.invoiceType || 'tax-invoice'),
           amount: Number(invoiceData.amount) || 0,
+          advancePaid: Number(invoiceData.advancePaid) || 0,
+          consigneeType: invoiceData.consigneeType || 'same',
+          consigneeData: invoiceData.consigneeData && typeof invoiceData.consigneeData === 'object'
+            ? { ...invoiceData.consigneeData }
+            : {},
           number: String(invoiceData.invoiceNo || (invoices.length + 1)),
+          invoiceNo: String(invoiceData.invoiceNo || (invoices.length + 1)),
+          invoicePrefix: String(invoiceData.invoicePrefix || ''),
+          invoiceNumber: String(invoiceData.invoiceNumber || ''),
           date: invoiceData.date ? new Date(invoiceData.date).toISOString() : new Date().toISOString(),
           status: 'unpaid',
           selectedBuyer: invoiceData.selectedBuyer && typeof invoiceData.selectedBuyer === 'object'
@@ -572,9 +588,10 @@ function App() {
           products: Array.isArray(invoiceData.products)
             ? invoiceData.products.map(p => ({
                 ...p,
-                price: Number(p.price) || 0,
+                price: Number(p.price || p.salePrice) || 0,
+                salePrice: Number(p.salePrice || p.price) || 0,
                 quantity: Number(p.quantity) || 0,
-                total: (Number(p.price) || 0) * (Number(p.quantity) || 0)
+                total: (Number(p.salePrice || p.price) || 0) * (Number(p.quantity) || 0)
               }))
             : [],
           transportData: invoiceData.transportData && typeof invoiceData.transportData === 'object'
@@ -626,7 +643,7 @@ function App() {
         {/* Invoice Creation & Editing Routes */}
         <Route
           path="/create-invoice"
-          element={<CreateInvoicePage onSave={handleSaveInvoice} />}
+          element={<CreateInvoicePage onSave={handleSaveInvoice} invoices={invoices} />}
         />
         <Route
           path="/edit-invoice/:id"

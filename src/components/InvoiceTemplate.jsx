@@ -17,6 +17,11 @@ const InvoiceTemplate = forwardRef(({ data = {}, bankData = null, forPDF = false
   }, [data, bankData]);
 
   const buyerDataToUse = data?.buyerData || data?.selectedBuyer || {};
+  const otherData = data?.otherData || {};
+  const transportData = data?.transportData || {};
+  const advancePaid = safeCalculate(data?.advancePaid || 0);
+  const consigneeType = data?.consigneeType || 'same';
+  const consigneeData = consigneeType === 'different' ? (data?.consigneeData || {}) : buyerDataToUse;
 
   const {
     invoiceNumber = '',
@@ -301,7 +306,13 @@ const InvoiceTemplate = forwardRef(({ data = {}, bankData = null, forPDF = false
               </p>
               <p className="text-xs mt-1">
                 GSTIN : {supplierData?.gstin}
-                {supplierData?.stateCode && <span className="border border-black px-1 ml-1 text-xxs">State Code : {supplierData.stateCode}</span>}
+                {supplierData?.pan && <span className="ml-2 font-semibold">| PAN : {supplierData.pan}</span>}
+              </p>
+              {supplierData?.msme && (
+                <p className="text-xs font-semibold mt-0.5">MSME : {supplierData.msme}</p>
+              )}
+              <p className="text-xs font-semibold mt-0.5">
+                State Name : {supplierData?.state || 'Haryana'}{supplierData?.stateCode ? `, Code : ${supplierData.stateCode}` : ''}
               </p>
             </div>
 
@@ -315,24 +326,51 @@ const InvoiceTemplate = forwardRef(({ data = {}, bankData = null, forPDF = false
             <div className="w-1/3 text-right italic text-xxs">Original For Recipient</div>
           </div>
 
-          {/* InvoiceDetails */}
-          <div className="p-2 space-y-0.5 border-b border-black text-xs">
-            <div className="flex justify-between"><span>Invoice Number</span><span className="font-bold">{invoiceNumber || number}</span></div>
-            <div className="flex justify-between"><span>Invoice Date</span><span className="font-bold">{formatDate(date)}</span></div>
-            <div className="flex justify-between"><span>State</span><span className="font-bold uppercase">{supplierData?.state}</span></div>
-            <div className="flex justify-between"><span>Reverse Charge</span><span className="font-bold">NO</span></div>
+          {/* InvoiceDetails Grid */}
+          <div className="border-b border-black text-xs grid grid-cols-2 divide-x divide-black bg-white">
+            <div className="p-2 space-y-1">
+              <div className="flex justify-between"><span>Invoice No.:</span><span className="font-bold">{invoiceNumber || number}</span></div>
+              <div className="flex justify-between"><span>Date:</span><span className="font-bold">{formatDate(date)}</span></div>
+              {otherData?.poNumber && <div className="flex justify-between"><span>Customer PO No.:</span><span className="font-bold">{otherData.poNumber}</span></div>}
+              {otherData?.poDate && <div className="flex justify-between"><span>Customer PO Date:</span><span className="font-bold">{formatDate(otherData.poDate)}</span></div>}
+              {otherData?.paymentTerms && <div className="flex justify-between"><span>Payment Terms:</span><span className="font-bold">{otherData.paymentTerms}</span></div>}
+            </div>
+            <div className="p-2 space-y-1">
+              {transportData?.transportMode && transportData?.transportMode !== 'not-applicable' && (
+                <div className="flex justify-between"><span>Mode of Transport:</span><span className="font-bold uppercase">{transportData.transportMode}</span></div>
+              )}
+              {otherData?.ewayBillNumber && <div className="flex justify-between"><span>E-Way Bill No.:</span><span className="font-bold">{otherData.ewayBillNumber}</span></div>}
+              {(transportData?.placeOfSupply || buyerDataToUse?.state) && (
+                <div className="flex justify-between">
+                  <span>Place of Supply:</span>
+                  <span className="font-bold uppercase">
+                    {transportData?.placeOfSupply || `${buyerDataToUse?.state || ''} ${buyerDataToUse?.stateCode ? `- ${buyerDataToUse.stateCode}` : ''}`}
+                  </span>
+                </div>
+              )}
+              {otherData?.termsOfDelivery && <div className="flex justify-between"><span>Terms of Delivery:</span><span className="font-bold">{otherData.termsOfDelivery}</span></div>}
+              <div className="flex justify-between"><span>Reverse Charge:</span><span className="font-bold">NO</span></div>
+            </div>
           </div>
 
-          {/* BilledTo */}
-          <div className="p-2 border-b border-black text-xs space-y-1">
-            <div className="text-center font-bold mb-2 pb-1 border-b border-black w-full text-[10px]">Details of Receiver | Billed to</div>
-            <p className="text-xs"><span className="font-bold">Name:</span> {buyerDataToUse?.name || buyerDataToUse?.companyName}</p>
-            <p className="text-xs"><span className="font-bold">Address:</span> {buyerDataToUse?.address}</p>
-            <p className="text-xs">
-              <span className="font-bold">GSTIN:</span> {buyerDataToUse?.gstin || 'Not specified'}
-              {buyerDataToUse?.stateCode && <span className="border border-black px-1 ml-2 text-xxs">State Code : {buyerDataToUse.stateCode}</span>}
-            </p>
-            <p className="text-xs"><span className="font-bold">State:</span> {buyerDataToUse?.state}</p>
+          {/* Consignee & Buyer Sections */}
+          <div className={`border-b border-black text-xs bg-white ${consigneeType !== 'not-required' ? 'grid grid-cols-2 divide-x divide-black' : ''}`}>
+            {consigneeType !== 'not-required' && (
+              <div className="p-2 space-y-1">
+                <div className="font-bold mb-1 pb-1 border-b border-black text-[11px] text-invoice-blue">Consignee (Ship to)</div>
+                <p className="font-bold">{(consigneeType === 'same' ? buyerDataToUse?.companyName || buyerDataToUse?.name : consigneeData?.companyName || consigneeData?.name) || ''}</p>
+                <p className="text-gray-700">{(consigneeType === 'same' ? buyerDataToUse?.address : consigneeData?.address) || ''}</p>
+                <p><span className="font-bold">GSTIN:</span> {(consigneeType === 'same' ? buyerDataToUse?.gstin : consigneeData?.gstin) || 'Not specified'}</p>
+                <p><span className="font-bold">State Name:</span> {(consigneeType === 'same' ? buyerDataToUse?.state : consigneeData?.state) || ''} {((consigneeType === 'same' ? buyerDataToUse?.stateCode : consigneeData?.stateCode)) ? `, Code: ${consigneeType === 'same' ? buyerDataToUse?.stateCode : consigneeData?.stateCode}` : ''}</p>
+              </div>
+            )}
+            <div className="p-2 space-y-1">
+              <div className="font-bold mb-1 pb-1 border-b border-black text-[11px] text-invoice-blue">Buyer (Bill to)</div>
+              <p className="font-bold">{buyerDataToUse?.name || buyerDataToUse?.companyName}</p>
+              <p className="text-gray-700">{buyerDataToUse?.address}</p>
+              <p><span className="font-bold">GSTIN:</span> {buyerDataToUse?.gstin || 'Not specified'}</p>
+              <p><span className="font-bold">State Name:</span> {buyerDataToUse?.state} {buyerDataToUse?.stateCode ? `, Code: ${buyerDataToUse.stateCode}` : ''}</p>
+            </div>
           </div>
 
           {/* ItemsTable */}
@@ -482,23 +520,24 @@ const InvoiceTemplate = forwardRef(({ data = {}, bankData = null, forPDF = false
           <div className="flex border-b border-black break-inside-avoid">
             {/* Left - Amount in words + Bank Details */}
             <div className="border-r border-black flex flex-col" style={{ width: '60%' }}>
-              <div className="p-2 text-center border-b border-black">
-                <p className="text-xs font-bold uppercase mb-1">Total Invoice Amount in words</p>
-                <p className="text-xs font-bold italic">{numberToWords(finalInvoiceAmount)} Rupees Only /-</p>
+              <div className="p-2 text-center border-b border-black relative">
+                <p className="text-xs font-bold uppercase mb-1">Amount Chargeable (in words)</p>
+                <p className="text-xs font-bold italic">INR {numberToWords(advancePaid > 0 ? Math.round(grandTotal - advancePaid) : afterRoundOff)} only</p>
+                <span className="absolute right-2 bottom-1 text-[10px] font-bold text-gray-700">E. & O.E.</span>
               </div>
               {bankData && bankData.bankName && (
                 <div className="p-2 flex-grow">
                   <p className="text-xs font-bold text-invoice-blue mb-1 flex items-center">
                     <svg className="w-4 h-4 mr-1" fill="currentColor" viewBox="0 0 20 20"><path d="M10.394 2.08a1 1 0 00-.788 0l-7 3a1 1 0 000 1.84L5.25 8.051a.999.999 0 01.356-.257l4-1.714a1 1 0 11.788 1.838L7.667 9.088l1.94.831a1 1 0 00.787 0l7-3a1 1 0 000-1.838l-7-3zM3.31 9.397L5 10.12v4.102a8.969 8.969 0 00-1.05-.174 1 1 0 01-.89-.89 11.115 11.115 0 01.25-3.762zM9.3 16.573A9.026 9.026 0 007 14.935v-3.957l1.818.78a3 3 0 002.364 0l5.508-2.361a11.026 11.026 0 01.25 3.762 1 1 0 01-.89.89 8.968 8.968 0 00-5.35 2.524 1 1 0 01-1.4 0zM6 18a1 1 0 001-1v-2.065a8.935 8.935 0 00-2 .712V17a1 1 0 001 1z"></path></svg>
-                    Bank and Payment Details
+                    Bank Details
                   </p>
                   <div className="w-3/4 text-xxs space-y-0.5 ml-2 pr-4">
-                    <div className="flex justify-between"><span className="font-semibold">Account Name</span><span className="font-bold text-right">{bankData.accountHolderName || supplierData?.name || supplierData?.companyName}</span></div>
-                    <div className="flex justify-between"><span className="font-semibold">Account No.</span><span className="font-bold text-right">{bankData.accountNumber}</span></div>
-                    <div className="flex justify-between"><span className="font-semibold">IFSC Code</span><span className="font-bold text-right">{bankData.ifscCode}</span></div>
-                    <div className="flex justify-between"><span className="font-semibold">Bank Name</span><span className="font-bold text-right">{bankData.bankName}</span></div>
+                    <div className="flex justify-between"><span className="font-semibold">Bank:</span><span className="font-bold text-right">{bankData.bankName}</span></div>
+                    <div className="flex justify-between"><span className="font-semibold">Beneficiary Name:</span><span className="font-bold text-right">{bankData.accountHolderName || supplierData?.name || supplierData?.companyName}</span></div>
+                    <div className="flex justify-between"><span className="font-semibold">Current Account No.:</span><span className="font-bold text-right">{bankData.accountNumber}</span></div>
+                    <div className="flex justify-between"><span className="font-semibold">IFSC Code:</span><span className="font-bold text-right">{bankData.ifscCode}</span></div>
                     {bankData.branchName && (
-                      <div className="flex justify-between"><span className="font-semibold">Branch Name</span><span className="font-bold uppercase text-right">{bankData.branchName}</span></div>
+                      <div className="flex justify-between"><span className="font-semibold">Branch Name:</span><span className="font-bold uppercase text-right">{bankData.branchName}</span></div>
                     )}
                   </div>
                 </div>
@@ -510,55 +549,81 @@ const InvoiceTemplate = forwardRef(({ data = {}, bankData = null, forPDF = false
             {/* Right - Totals */}
             <div className="text-xxs font-bold flex flex-col" style={{ width: '40%' }}>
               <div className="flex border-b border-black bg-invoice-blue flex-grow">
-                <div className="w-3/5 p-1 border-r border-black text-left flex items-center">Total Amount Before Tax</div>
+                <div className="w-3/5 p-1 border-r border-black text-left flex items-center">Basic Price</div>
                 <div className="w-2/5 p-1 text-right flex items-center justify-end">₹ {subTotal.toFixed(2)}</div>
               </div>
+              {discountPercent > 0 && (
+                <>
+                  <div className="flex border-b border-black flex-grow">
+                    <div className="w-3/5 p-1 border-r border-black text-left flex items-center">(-) Discount ({discountPercent}%)</div>
+                    <div className="w-2/5 p-1 text-right flex items-center justify-end">-₹ {discountAmount.toFixed(2)}</div>
+                  </div>
+                  <div className="flex border-b border-black bg-invoice-blue flex-grow">
+                    <div className="w-3/5 p-1 border-r border-black text-left flex items-center">Amount</div>
+                    <div className="w-2/5 p-1 text-right flex items-center justify-end">₹ {(subTotal - discountAmount).toFixed(2)}</div>
+                  </div>
+                </>
+              )}
               {showIGST && (
                 <div className="flex border-b border-black bg-invoice-blue flex-grow">
-                  <div className="w-3/5 p-1 border-r border-black text-right flex items-center justify-end">Add : IGST</div>
+                  <div className="w-3/5 p-1 border-r border-black text-right flex items-center justify-end">(+) IGST</div>
                   <div className="w-2/5 p-1 text-right flex items-center justify-end">₹ {totalIGSTAmount.toFixed(2)}</div>
                 </div>
               )}
               {showSGST && (
                 <>
                   <div className="flex border-b border-black bg-invoice-blue flex-grow">
-                    <div className="w-3/5 p-1 border-r border-black text-right flex items-center justify-end">Add : CGST</div>
+                    <div className="w-3/5 p-1 border-r border-black text-right flex items-center justify-end">(+) CGST</div>
                     <div className="w-2/5 p-1 text-right flex items-center justify-end">₹ {totalCGSTAmount.toFixed(2)}</div>
                   </div>
                   <div className="flex border-b border-black bg-invoice-blue flex-grow">
-                    <div className="w-3/5 p-1 border-r border-black text-right flex items-center justify-end">Add : SGST</div>
+                    <div className="w-3/5 p-1 border-r border-black text-right flex items-center justify-end">(+) SGST</div>
                     <div className="w-2/5 p-1 text-right flex items-center justify-end">₹ {totalSGSTAmount.toFixed(2)}</div>
                   </div>
                 </>
               )}
               <div className="flex border-b border-black bg-invoice-blue flex-grow">
-                <div className="w-3/5 p-1 border-r border-black text-left flex items-center">Total Tax Amount</div>
-                <div className="w-2/5 p-1 text-right flex items-center justify-end">₹ {totalGST.toFixed(2)}</div>
+                <div className="w-3/5 p-1 border-r border-black text-left flex items-center">Total Price</div>
+                <div className="w-2/5 p-1 text-right flex items-center justify-end">₹ {grandTotal.toFixed(2)}</div>
               </div>
-              {discountPercent > 0 && (
-                <div className="flex border-b border-black flex-grow">
-                  <div className="w-3/5 p-1 border-r border-black text-left flex items-center">Discount Amount ({discountPercent}%)</div>
-                  <div className="w-2/5 p-1 text-right flex items-center justify-end">-₹ {discountAmount.toFixed(2)}</div>
-                </div>
+              {advancePaid > 0 && (
+                <>
+                  <div className="flex border-b border-black flex-grow" style={{ background: '#fef3c7' }}>
+                    <div className="w-3/5 p-1 border-r border-black text-left flex items-center">Advance paid</div>
+                    <div className="w-2/5 p-1 text-right flex items-center justify-end">₹ {advancePaid.toFixed(2)}</div>
+                  </div>
+                  <div className="flex border-b border-black bg-invoice-blue flex-grow">
+                    <div className="w-3/5 p-1 border-r border-black text-left flex items-center">Balance Payment</div>
+                    <div className="w-2/5 p-1 text-right flex items-center justify-end">₹ {(grandTotal - advancePaid).toFixed(2)}</div>
+                  </div>
+                  <div className="flex bg-invoice-blue flex-grow">
+                    <div className="w-3/5 p-1 border-r border-black text-left flex items-center">Balance Payment (rounded off)</div>
+                    <div className="w-2/5 p-1 text-right flex items-center justify-end">₹ {Math.round(grandTotal - advancePaid).toFixed(2)}</div>
+                  </div>
+                </>
               )}
-              <div className="flex border-b border-black bg-invoice-blue flex-grow">
-                <div className="w-3/5 p-1 border-r border-black text-left flex items-center">Round Off Value</div>
-                <div className="w-2/5 p-1 text-right flex items-center justify-end">₹ {roundOffValue > 0 ? '+' : ''}{roundOffValue.toFixed(2)}</div>
-              </div>
-              {tdsEnabled && tdsPercent > 0 && (
-                <div className="flex border-b border-black flex-grow" style={{ background: '#fff3cd' }}>
-                  <div className="w-3/5 p-1 border-r border-black text-left flex items-center">Less: TDS ({tdsPercent}%)</div>
-                  <div className="w-2/5 p-1 text-right flex items-center justify-end">-₹ {tdsAmount.toFixed(2)}</div>
-                </div>
+              {!(advancePaid > 0) && (
+                <>
+                  <div className="flex border-b border-black bg-invoice-blue flex-grow">
+                    <div className="w-3/5 p-1 border-r border-black text-left flex items-center">Round Off Value</div>
+                    <div className="w-2/5 p-1 text-right flex items-center justify-end">₹ {roundOffValue > 0 ? '+' : ''}{roundOffValue.toFixed(2)}</div>
+                  </div>
+                  {tdsEnabled && tdsPercent > 0 && (
+                    <div className="flex border-b border-black flex-grow" style={{ background: '#fff3cd' }}>
+                      <div className="w-3/5 p-1 border-r border-black text-left flex items-center">Less: TDS ({tdsPercent}%)</div>
+                      <div className="w-2/5 p-1 text-right flex items-center justify-end">-₹ {tdsAmount.toFixed(2)}</div>
+                    </div>
+                  )}
+                  <div className="flex border-b border-black bg-invoice-blue flex-grow">
+                    <div className="w-3/5 p-1 border-r border-black text-left flex items-center">Final Invoice Amount</div>
+                    <div className="w-2/5 p-1 text-right flex items-center justify-end">₹ {finalInvoiceAmount.toFixed(2)}</div>
+                  </div>
+                  <div className="flex bg-invoice-blue flex-grow">
+                    <div className="w-3/5 p-1 border-r border-black text-left flex items-center">Balance Due</div>
+                    <div className="w-2/5 p-1 text-right flex items-center justify-end">₹ {finalInvoiceAmount.toFixed(2)}</div>
+                  </div>
+                </>
               )}
-              <div className="flex border-b border-black bg-invoice-blue flex-grow">
-                <div className="w-3/5 p-1 border-r border-black text-left flex items-center">Final Invoice Amount</div>
-                <div className="w-2/5 p-1 text-right flex items-center justify-end">₹ {finalInvoiceAmount.toFixed(2)}</div>
-              </div>
-              <div className="flex bg-invoice-blue flex-grow">
-                <div className="w-3/5 p-1 border-r border-black text-left flex items-center">Balance Due</div>
-                <div className="w-2/5 p-1 text-right flex items-center justify-end">₹ {finalInvoiceAmount.toFixed(2)}</div>
-              </div>
             </div>
           </div>
 
