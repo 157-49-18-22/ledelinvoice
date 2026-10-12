@@ -102,4 +102,43 @@
   background-color: #FFD700;
   color: #000;
   font-weight: 500;
-} 
+}
+
+/* ===== MOBILE RESPONSIVE - INVOICE FILTER ===== */
+@media (max-width: 480px) {
+  .filter-header {
+    padding: 0.75rem 0.85rem;
+  }
+
+  .filter-header h2 {
+    font-size: 1rem;
+  }
+
+  .filter-section {
+    padding: 0.85rem;
+  }
+
+  .filter-section h3 {
+    font-size: 0.9rem;
+    margin-bottom: 0.75rem;
+  }
+
+  .radio-label {
+    font-size: 0.85rem;
+  }
+
+  .filter-row {
+    flex-direction: column;
+  }
+
+  .filter-actions {
+    padding: 0.75rem;
+    gap: 0.75rem;
+  }
+
+  .clear-button,
+  .apply-button {
+    padding: 0.65rem;
+    font-size: 0.9rem;
+  }
+}

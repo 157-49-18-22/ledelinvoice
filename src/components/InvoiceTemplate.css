@@ -177,4 +177,28 @@ table {
     border-style: solid !important;
   }
 }
+/* ===== MOBILE RESPONSIVE - INVOICE TEMPLATE PREVIEW ===== */
+@media (max-width: 768px) {
+  .invoice-wrapper {
+    padding: 10px;
+    overflow-x: auto;
+  }
 
+  .invoice-container {
+    width: 100%;
+    min-width: 340px;
+    min-height: unset;
+    font-size: 11px;
+  }
+}
+
+@media (max-width: 480px) {
+  .invoice-wrapper {
+    padding: 6px;
+  }
+
+  .invoice-container {
+    font-size: 10px;
+    min-width: 320px;
+  }
+}

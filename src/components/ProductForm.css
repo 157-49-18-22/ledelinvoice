@@ -133,4 +133,52 @@
 
 .submit-btn:active {
   transform: translateY(0);
-} 
+}
+
+/* ===== MOBILE RESPONSIVE - PRODUCT FORM ===== */
+@media (max-width: 480px) {
+  .product-form {
+    margin: 12px 8px;
+    padding: 16px;
+    border-radius: 6px;
+  }
+
+  .tax-section {
+    grid-template-columns: 1fr;
+    gap: 14px;
+    padding: 12px;
+  }
+
+  .radio-group {
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+
+  .input-group label {
+    font-size: 0.9rem;
+  }
+
+  .input-group input,
+  .input-group select,
+  .input-group textarea {
+    padding: 8px;
+    font-size: 0.9rem;
+  }
+
+  .calculations-box {
+    padding: 14px;
+  }
+
+  .calculations-box h3 {
+    font-size: 1rem;
+  }
+
+  .calc-row span:last-child {
+    font-size: 0.95rem;
+  }
+
+  .submit-btn {
+    padding: 10px;
+    font-size: 0.95rem;
+  }
+}
