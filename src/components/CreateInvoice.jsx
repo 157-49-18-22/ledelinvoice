@@ -319,6 +319,7 @@ const CreateInvoice = ({ onClose, onSave, initialInvoiceData = null, invoices = 
         setInvoiceNumber(getNextInvoiceNumber(invoices));
       }
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [invoices, invoiceId, effectiveInitialData]);
 
   // Save buyers whenever allBuyers changes
